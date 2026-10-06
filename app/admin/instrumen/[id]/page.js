@@ -301,7 +301,7 @@ function InstrumenEditor({ id, instrument }) {
                     aria-expanded={expanded}
                     className="flex min-w-0 flex-1 items-start gap-3 text-left"
                   >
-                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-emerald-700 text-sm font-bold text-white">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand text-sm font-bold text-white">
                       {area.id || "?"}
                     </span>
                     <span className="min-w-0 flex-1">
@@ -419,7 +419,7 @@ function InstrumenEditor({ id, instrument }) {
           {draft.rubrics.map((r, i) => (
             <div key={r.score} className="rounded-xl border border-slate-200 p-4">
               <div className="flex items-center gap-3">
-                <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-slate-900 text-sm font-bold text-white">
+                <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-slate-900 text-sm font-bold text-slate-50">
                   {r.score}
                 </span>
                 <Input
@@ -453,7 +453,7 @@ function InstrumenEditor({ id, instrument }) {
         </div>
       </Card>
 
-      <div className="print-static sticky bottom-0 z-10 -mx-4 mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 bg-white/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
+      <div className="print-static sticky bottom-0 z-10 -mx-4 mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 bg-surface/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
         <p className="text-xs text-slate-500">
           {draft.areas.length} area · {totalIndicators} indikator
         </p>
@@ -491,7 +491,7 @@ function QuestionEditor({ number, question, isFirst, isLast, onPatch, onMove, on
         </div>
       </div>
 
-      <div className="space-y-4 bg-white px-4 py-4">
+      <div className="space-y-4 bg-surface px-4 py-4">
         <Field label="Pernyataan indikator" required>
           <Textarea
             rows={2}

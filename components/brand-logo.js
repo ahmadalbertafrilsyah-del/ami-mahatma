@@ -11,7 +11,7 @@ export function BrandLogo({ size = 40, className, rounded = "rounded-xl" }) {
   return (
     <span
       className={cx(
-        "relative grid shrink-0 place-items-center overflow-hidden bg-white ring-1 ring-black/5",
+        "relative grid shrink-0 place-items-center overflow-hidden bg-surface ring-1 ring-black/5",
         rounded,
         className
       )}

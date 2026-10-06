@@ -57,7 +57,7 @@ export function EvidenceUploader({ files = [], onChange, folder = "ami/bukti", r
           {files.map((file) => (
             <li
               key={file.publicId}
-              className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-2"
+              className="flex items-center gap-3 rounded-xl border border-slate-200 bg-surface p-2"
             >
               {file.resourceType === "image" ? (
                 // eslint-disable-next-line @next/next/no-img-element

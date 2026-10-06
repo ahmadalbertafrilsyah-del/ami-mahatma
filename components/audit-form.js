@@ -99,7 +99,7 @@ export function AuditForm({ audit, instrument, readOnly = false, onSave, actions
           <Card key={area.id} className="overflow-hidden p-0">
             <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 bg-slate-50/70 px-4 py-3.5 sm:px-5">
               <h3 className="text-sm font-semibold text-balance text-slate-900">
-                <span className="mr-2 inline-grid size-6 place-items-center rounded-lg bg-emerald-700 text-xs text-white">
+                <span className="mr-2 inline-grid size-6 place-items-center rounded-lg bg-brand text-xs text-white">
                   {area.id}
                 </span>
                 {area.title}
@@ -163,7 +163,7 @@ function QuestionRow({ question, rubrics, readOnly, value, onPatch }) {
                 "flex gap-2.5 rounded-xl border p-3 transition",
                 active
                   ? "border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-600/15"
-                  : "border-slate-200 bg-white",
+                  : "border-slate-200 bg-surface",
                 readOnly ? "cursor-default opacity-85" : "cursor-pointer hover:border-emerald-400"
               )}
             >

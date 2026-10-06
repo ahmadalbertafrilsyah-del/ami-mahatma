@@ -16,6 +16,8 @@ import {
 } from "@/lib/constants";
 import { Button, Card, Field, Input, Notice, Select, Spinner } from "@/components/ui";
 import { BrandLogo } from "@/components/brand-logo";
+import { ThemeToggleButton } from "@/components/theme-provider";
+import { IconUserPlus } from "@/components/icons";
 
 const EMPTY = { kepalaNama: "", kepalaEmail: "", kepalaWhatsapp: "", nama: "", jenjang: "" };
 
@@ -79,9 +81,9 @@ export default function BerandaPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
+    <div className="min-h-screen-dvh">
+      <header className="pt-safe sticky top-0 z-20 border-b border-slate-200/80 bg-surface/85 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:px-6">
           <BrandLogo size={36} />
           <span className="min-w-0 flex-1">
             <strong className="block truncate text-sm font-semibold text-slate-900">
@@ -89,6 +91,7 @@ export default function BerandaPage() {
             </strong>
             <span className="block truncate text-xs text-slate-500">{APP_TAGLINE}</span>
           </span>
+          <ThemeToggleButton />
           {!loading && user && role ? (
             <Link href={ROLE_HOME[role] ?? "/login"}>
               <Button size="sm">Buka Dashboard</Button>
@@ -118,12 +121,32 @@ export default function BerandaPage() {
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               {LANGKAH.map(([judul, isi]) => (
-                <Card key={judul} className="bg-white/70">
+                <Card key={judul} className="bg-surface/70">
                   <p className="font-semibold text-slate-900">{judul}</p>
                   <p className="mt-1 text-sm leading-relaxed text-slate-500">{isi}</p>
                 </Card>
               ))}
             </div>
+
+            {/* Jalur kedua: auditor mendaftarkan akunnya sendiri. Terpisah dari
+                formulir pendaftaran lembaga di sebelah kanan. */}
+            <Card className="mt-6 flex flex-wrap items-center gap-4 border-emerald-200/70 bg-emerald-50/60">
+              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand text-white">
+                <IconUserPlus />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-slate-900">Anda seorang auditor?</p>
+                <p className="mt-0.5 text-sm leading-relaxed text-slate-600">
+                  Daftarkan akun Anda sendiri, sekaligus boleh mendaftarkan lembaga yang akan
+                  diaudit.
+                </p>
+              </div>
+              <Link href="/daftar-auditor" className="max-sm:w-full">
+                <Button variant="outline" className="max-sm:w-full">
+                  Daftar Auditor
+                </Button>
+              </Link>
+            </Card>
 
             <p className="mt-8 text-sm text-slate-500">
               Sudah punya akun administrator atau auditor?{" "}

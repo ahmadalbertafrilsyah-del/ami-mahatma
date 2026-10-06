@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/components/auth-provider";
 import { Button, Field, Input, Notice, Spinner } from "@/components/ui";
+import { ThemeSwitch } from "@/components/theme-provider";
 import { BrandLogo } from "@/components/brand-logo";
 import { APP_NAME, APP_TAGLINE, ROLE_HOME } from "@/lib/constants";
 import { firebaseConfigured } from "@/lib/firebase";
@@ -65,21 +66,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-[1.05fr_minmax(26rem,0.95fr)]">
-      <div className="relative hidden flex-col justify-center overflow-hidden bg-slate-950 p-12 text-white lg:flex xl:p-16">
+    <div className="grid min-h-screen-dvh lg:grid-cols-[1.05fr_minmax(26rem,0.95fr)]">
+      <div className="relative hidden flex-col justify-center overflow-hidden bg-shell p-12 text-white lg:flex xl:p-16">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(90rem_50rem_at_-10%_-10%,#065f46_0%,transparent_55%),radial-gradient(70rem_40rem_at_110%_110%,#0f766e_0%,transparent_50%)]" />
         <div className="pointer-events-none absolute -right-32 -bottom-44 size-[460px] rounded-full border border-white/10 bg-white/[0.03]" />
         <div className="relative">
           <BrandLogo size={56} rounded="rounded-2xl" className="mb-6" />
-          <p className="text-xs font-extrabold tracking-[0.14em] text-emerald-200 uppercase">
+          <p className="text-xs font-extrabold tracking-[0.14em] text-emerald-400 uppercase">
             {APP_TAGLINE}
           </p>
           <h1 className="mt-3 text-4xl leading-[1.08] font-bold tracking-tight xl:text-5xl">
             {APP_NAME}
           </h1>
-          <p className="mt-4 max-w-xl leading-relaxed text-emerald-100">
+          <p className="mt-4 max-w-xl leading-relaxed text-white/70">
             Halaman masuk khusus petugas. Pimpinan satuan pendidikan tidak perlu akun — cukup
-            mendaftar lewat formulir di halaman depan.
+            mendaftar lewat formulir di halaman depan. Calon auditor dapat mendaftarkan akunnya
+            sendiri dan menunggu persetujuan administrator.
           </p>
           <div className="mt-8 grid max-w-xl gap-3 sm:grid-cols-2">
             {[
@@ -91,14 +93,14 @@ export default function LoginPage() {
                 className="rounded-xl border border-white/10 bg-white/[0.06] p-4 text-sm leading-snug backdrop-blur-sm"
               >
                 <b className="block font-semibold">{title}</b>
-                <span className="text-emerald-100">{desc}</span>
+                <span className="text-white/65">{desc}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-center bg-white px-5 py-10 sm:px-12">
+      <div className="flex items-center justify-center bg-surface px-5 py-10 sm:px-12">
         <div className="w-full max-w-sm">
           <p className="text-xs font-bold tracking-[0.14em] text-emerald-700 uppercase">
             Akses Petugas
@@ -158,6 +160,22 @@ export default function LoginPage() {
             <Link href="/" className="font-semibold text-slate-400 hover:text-slate-600">
               Halaman depan
             </Link>
+          </div>
+
+          <div className="mt-6 border-t border-slate-200 pt-5 text-center">
+            <p className="text-sm text-slate-500">Belum punya akun auditor?</p>
+            <Link href="/daftar-auditor" className="mt-2 block">
+              <Button variant="outline" className="w-full">
+                Daftar sebagai Auditor
+              </Button>
+            </Link>
+            <p className="mt-3 text-xs leading-relaxed text-slate-400">
+              Akun auditor baru aktif setelah disetujui administrator.
+            </p>
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <ThemeSwitch />
           </div>
         </div>
       </div>

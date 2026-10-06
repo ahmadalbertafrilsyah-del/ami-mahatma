@@ -499,7 +499,7 @@ function FindingCard({ finding, index, auditId, actorUid, onEdit, onDelete }) {
           aria-expanded={open}
           className="flex min-w-0 flex-1 items-start gap-3 text-left"
         >
-          <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-slate-900 text-xs font-bold text-white tabular-nums">
+          <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-slate-900 text-xs font-bold text-slate-50 tabular-nums">
             {index + 1}
           </span>
           <span className="min-w-0 flex-1">
@@ -564,7 +564,7 @@ function FindingCard({ finding, index, auditId, actorUid, onEdit, onDelete }) {
             </div>
           </section>
 
-          <section className="border-t border-slate-100 bg-white px-4 py-5 sm:px-5">
+          <section className="border-t border-slate-100 bg-surface px-4 py-5 sm:px-5">
             <h5 className="mb-3 text-xs font-bold tracking-wider text-slate-500 uppercase">
               Rencana Tindak Lanjut
             </h5>

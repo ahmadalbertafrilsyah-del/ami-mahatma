@@ -44,7 +44,7 @@ export function Card({ className, children, ...rest }) {
   return (
     <div
       className={cx(
-        "print-flat rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03]",
+        "print-flat rounded-2xl border border-slate-200/80 bg-surface shadow-sm shadow-black/[0.04]",
         !className?.includes("p-") && "p-5",
         className
       )}
@@ -77,10 +77,10 @@ export function CardHeader({ title, description, actions, className }) {
 
 const BUTTON_VARIANTS = {
   primary:
-    "bg-emerald-700 text-white shadow-sm shadow-emerald-900/20 hover:bg-emerald-800 active:bg-emerald-900 disabled:bg-emerald-700/40 disabled:shadow-none",
+    "bg-brand text-white shadow-sm shadow-black/15 hover:bg-brand-strong active:bg-brand-stronger disabled:bg-brand/40 disabled:shadow-none",
   soft: "bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300 disabled:text-slate-400",
   outline:
-    "border border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:text-slate-400",
+    "border border-slate-300 bg-surface text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:text-slate-400",
   danger:
     "bg-red-50 text-red-700 ring-1 ring-inset ring-red-200 hover:bg-red-100 disabled:text-red-300",
   ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 disabled:text-slate-300",
@@ -125,7 +125,7 @@ export function Field({ label, hint, error, required, children, className }) {
 }
 
 const CONTROL =
-  "w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-xs outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:bg-slate-50 disabled:text-slate-500";
+  "w-full rounded-xl border border-slate-300 bg-surface px-3 py-2.5 text-sm text-slate-900 shadow-xs outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:bg-slate-50 disabled:text-slate-500";
 
 export function Input({ className, ...rest }) {
   return <input className={cx(CONTROL, className)} {...rest} />;
@@ -169,7 +169,7 @@ export function StickyToolbar({ children, className }) {
   return (
     <div
       className={cx(
-        "print-static sticky top-16 z-10 -mx-4 mb-5 border-b border-slate-200/80 bg-white/85 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6",
+        "print-static sticky top-16 z-10 -mx-4 mb-5 border-b border-slate-200/80 bg-surface/85 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6",
         className
       )}
     >
@@ -227,7 +227,7 @@ export function EmptyState({ title, description, action, className }) {
   return (
     <div
       className={cx(
-        "rounded-2xl border border-dashed border-slate-300 bg-white/60 px-6 py-14 text-center",
+        "rounded-2xl border border-dashed border-slate-300 bg-surface/60 px-6 py-14 text-center",
         className
       )}
     >
@@ -304,7 +304,7 @@ export function Tabs({ items, value, onChange, className }) {
             className={cx(
               "rounded-xl px-4 py-2 text-sm font-semibold whitespace-nowrap transition",
               active
-                ? "bg-emerald-700 text-white shadow-sm"
+                ? "bg-brand text-white shadow-sm"
                 : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
             )}
           >
@@ -344,7 +344,7 @@ export function Table({ head, children, empty }) {
       <div className="scroll-slim w-full overflow-x-auto md:rounded-b-2xl">
         <table className="w-full border-collapse text-left text-sm max-md:block">
           <thead className="max-md:hidden">
-            <tr className="border-b border-slate-200/80 bg-slate-50/60">
+            <tr className="border-b border-slate-200/80 bg-surface-2">
               {head.map((h, i) => (
                 <th
                   key={`${h}-${i}`}
@@ -387,8 +387,8 @@ export function Row({ children, className, ...rest }) {
   return (
     <tr
       className={cx(
-        "transition-colors md:border-b md:border-slate-100 md:last:border-0 md:hover:bg-slate-50/60",
-        "max-md:block max-md:rounded-xl max-md:border max-md:border-slate-200 max-md:bg-white max-md:p-1",
+        "transition-colors md:border-b md:border-slate-100 md:last:border-0 md:hover:bg-surface-2",
+        "max-md:block max-md:rounded-xl max-md:border max-md:border-slate-200 max-md:bg-surface max-md:p-1",
         className
       )}
       {...rest}
@@ -440,7 +440,7 @@ export function Modal({ open, onClose, title, description, children, footer, siz
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-0 backdrop-blur-[2px] sm:items-start sm:p-6 md:p-10"
+      className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/55 p-0 backdrop-blur-[3px] sm:items-start sm:p-6 md:p-10"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -454,10 +454,13 @@ export function Modal({ open, onClose, title, description, children, footer, siz
       />
       <div
         className={cx(
-          "relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[88vh] sm:rounded-2xl",
+          "animate-sheet-up relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-surface shadow-2xl ring-1 ring-black/5 sm:max-h-[88dvh] sm:rounded-2xl",
           size === "lg" ? "sm:max-w-3xl" : size === "sm" ? "sm:max-w-sm" : "sm:max-w-xl"
         )}
       >
+        {/* Pegangan geser: penanda khas lembar bawah pada aplikasi seluler. */}
+        <div aria-hidden="true" className="mx-auto mt-2 h-1 w-10 rounded-full bg-slate-300 sm:hidden" />
+
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-200 px-5 py-4">
           <div className="min-w-0">
             <h2 className="font-semibold text-slate-900">{title}</h2>
@@ -478,7 +481,7 @@ export function Modal({ open, onClose, title, description, children, footer, siz
         <div className="scroll-slim min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
 
         {footer && (
-          <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-slate-200 bg-slate-50/70 px-5 py-4">
+          <div className="pb-safe flex shrink-0 flex-wrap justify-end gap-2 border-t border-slate-200 bg-surface-2 px-5 py-4">
             {footer}
           </div>
         )}

@@ -5,6 +5,7 @@ import { collection, orderBy, query } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { useQuerySnapshot } from "@/lib/hooks";
+import { apiFetch } from "@/lib/api-client";
 import { ROLES, ROLE_LABEL } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import { authHeaders, useAuth } from "@/components/auth-provider";
@@ -40,6 +41,10 @@ export default function PenggunaPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [banner, setBanner] = useState(null);
+
+  // Auditor yang mendaftar sendiri lewat /daftar-auditor menunggu persetujuan:
+  // akunnya ada, tetapi belum aktif sampai administrator menyetujuinya.
+  const pending = users.filter((u) => u.pendingApproval && u.active === false);
 
   const visible = users.filter((u) => {
     if (filter !== "all" && u.role !== filter) return false;
@@ -82,13 +87,11 @@ export default function PenggunaPage() {
             ...(form.password ? { password: form.password } : {}),
           };
 
-      const res = await fetch("/api/admin/users", {
+      await apiFetch("/api/admin/users", {
         method: isCreate ? "POST" : "PATCH",
         headers: await authHeaders(),
         body: JSON.stringify(payload),
       });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error || "Gagal menyimpan pengguna.");
 
       setBanner({
         tone: "emerald",
@@ -105,16 +108,16 @@ export default function PenggunaPage() {
   async function toggleActive(user) {
     const nextActive = user.active === false;
     try {
-      const res = await fetch("/api/admin/users", {
+      await apiFetch("/api/admin/users", {
         method: "PATCH",
         headers: await authHeaders(),
         body: JSON.stringify({ uid: user.uid, active: nextActive }),
       });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error);
       setBanner({
         tone: "emerald",
-        text: nextActive ? `${user.nama} diaktifkan kembali.` : `${user.nama} dinonaktifkan.`,
+        text: nextActive
+          ? `${user.nama} disetujui dan kini dapat masuk ke dashboard.`
+          : `${user.nama} dinonaktifkan.`,
       });
     } catch (err) {
       setBanner({ tone: "red", text: err.message });
@@ -124,12 +127,10 @@ export default function PenggunaPage() {
   async function removeUser(user) {
     if (!confirm(`Hapus akun ${user.nama} (${user.email}) secara permanen?`)) return;
     try {
-      const res = await fetch(`/api/admin/users?uid=${encodeURIComponent(user.uid)}`, {
+      await apiFetch(`/api/admin/users?uid=${encodeURIComponent(user.uid)}`, {
         method: "DELETE",
         headers: await authHeaders(),
       });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error);
       setBanner({ tone: "emerald", text: `Akun ${user.nama} dihapus.` });
     } catch (err) {
       setBanner({ tone: "red", text: err.message });
@@ -149,6 +150,52 @@ export default function PenggunaPage() {
         <Notice tone={banner.tone} className="mb-4">
           {banner.text}
         </Notice>
+      )}
+
+      {pending.length > 0 && (
+        <Card className="mb-4 border-amber-300/70 bg-amber-50 p-0">
+          <div className="border-b border-amber-300/50 px-5 py-4">
+            <h3 className="font-semibold text-amber-900">
+              {pending.length} pendaftaran auditor menunggu persetujuan
+            </h3>
+            <p className="mt-0.5 text-sm text-amber-800/80">
+              Akun ini sudah dibuat tetapi belum dapat masuk ke dashboard sampai Anda menyetujuinya.
+            </p>
+          </div>
+          <ul className="divide-y divide-amber-300/40">
+            {pending.map((u) => (
+              <li
+                key={u.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5"
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-slate-900">{u.nama}</p>
+                  <p className="truncate text-xs text-slate-500">
+                    {u.email}
+                    {u.telepon ? ` · ${u.telepon}` : ""}
+                    {u.instansi ? ` · ${u.instansi}` : ""}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    Mendaftar {formatDate(u.createdAt)}
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <Button size="sm" onClick={() => toggleActive(u)}>
+                    Setujui
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-red-600 hover:bg-red-50"
+                    onClick={() => removeUser(u)}
+                  >
+                    Tolak
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
 
       <Card className="mb-4">
@@ -193,8 +240,20 @@ export default function PenggunaPage() {
                   </Td>
                   <Td className="text-slate-600">{u.telepon || "-"}</Td>
                   <Td>
-                    <Badge tone={u.active === false ? "slate" : "emerald"}>
-                      {u.active === false ? "Nonaktif" : "Aktif"}
+                    <Badge
+                      tone={
+                        u.active !== false
+                          ? "emerald"
+                          : u.pendingApproval
+                            ? "amber"
+                            : "slate"
+                      }
+                    >
+                      {u.active !== false
+                        ? "Aktif"
+                        : u.pendingApproval
+                          ? "Menunggu Persetujuan"
+                          : "Nonaktif"}
                     </Badge>
                   </Td>
                   <Td className="text-slate-500">{formatDate(u.createdAt)}</Td>

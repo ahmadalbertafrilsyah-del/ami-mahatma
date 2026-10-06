@@ -4,35 +4,229 @@
   Skala lapisan. Dipakai konsisten agar tidak ada elemen yang tertimbun:
     10  toolbar lengket di dalam konten
     20  topbar
+    25  navigasi bawah (mode seluler)
     30  latar gelap menu seluler
     40  laci sidebar
     50  dialog
 */
 
+/*
+  Tema. Seluruh warna semantik diarahkan ke variabel runtime (`var(--...)`)
+  lewat `@theme inline`, sehingga `bg-surface`, `text-ink`, dan kawan-kawannya
+  ikut berubah begitu atribut `data-theme` pada <html> berganti — tanpa perlu
+  menulis varian `dark:` di setiap komponen.
+*/
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  --color-surface: #ffffff;
-  --color-canvas: #f6f7f9;
-  --color-line: #e6e9ee;
+  /* Permukaan */
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-canvas: var(--canvas);
+  --color-line: var(--line);
+
+  /* Teks */
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+
+  /* Merek. Dipisah dari skala emerald agar tombol tetap hijau pekat dengan
+     teks putih di kedua tema, sementara `text-emerald-700` bebas dibalik
+     menjadi hijau terang untuk keterbacaan di latar gelap. */
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-stronger: var(--brand-stronger);
+  --color-brand-soft: var(--brand-soft);
+
+  /* Panel gelap (sidebar, panel kiri halaman masuk). Sengaja tidak ikut
+     dibalik: panel ini memang gelap di tema terang maupun gelap. */
+  --color-shell: var(--shell);
+  --color-shell-2: var(--shell-2);
 }
 
 :root {
   color-scheme: light;
+
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --canvas: #f1f4f8;
+  --line: #e4e8ee;
+
+  --ink: #0f172a;
+  --muted: #64748b;
+
+  --brand: #047857;
+  --brand-strong: #065f46;
+  --brand-stronger: #064e3b;
+  --brand-soft: #ecfdf5;
+
+  --shell: #0b1220;
+  --shell-2: #111a2c;
+
+  --shadow-color: 15 23 42;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface: #141b25;
+  --surface-2: #19212d;
+  --canvas: #0a0f16;
+  --line: #27313f;
+
+  --ink: #f1f5f9;
+  --muted: #94a3b8;
+
+  --brand: #059669;
+  --brand-strong: #047857;
+  --brand-stronger: #065f46;
+  --brand-soft: #10281f;
+
+  --shell: #070c14;
+  --shell-2: #0d1522;
+
+  --shadow-color: 0 0 0;
+
+  /*
+    Skala abu Tailwind dibalik. Utilitas bawaan (`text-slate-900`,
+    `border-slate-200`, `divide-slate-100`, ...) menunjuk ke variabel ini,
+    jadi seluruh halaman ikut gelap tanpa disentuh satu per satu.
+  */
+  --color-white: #141b25;
+  --color-slate-50: #19212d;
+  --color-slate-100: #1f2835;
+  --color-slate-200: #2a3442;
+  --color-slate-300: #38465a;
+  --color-slate-400: #7d8a9c;
+  --color-slate-500: #9aa6b6;
+  --color-slate-600: #b6c0cd;
+  --color-slate-700: #d0d8e2;
+  --color-slate-800: #e4eaf2;
+  --color-slate-900: #f2f6fb;
+  --color-slate-950: #fafcff;
+
+  /* Tint lencana & notifikasi ikut dibalik: dasar menjadi gelap pekat,
+     teksnya menjadi terang. */
+  --color-emerald-50: #0e2a21;
+  --color-emerald-100: #12362a;
+  --color-emerald-200: #1b4c3a;
+  --color-emerald-700: #5eead4;
+  --color-emerald-800: #a7f3d0;
+  --color-emerald-900: #d1fae5;
+
+  --color-amber-50: #2e2209;
+  --color-amber-100: #3b2c0b;
+  --color-amber-200: #553f12;
+  --color-amber-600: #fbbf24;
+  --color-amber-700: #fcd34d;
+  --color-amber-800: #fde68a;
+  --color-amber-900: #fef3c7;
+
+  --color-red-50: #30141a;
+  --color-red-100: #3e1a21;
+  --color-red-200: #57222c;
+  --color-red-600: #fb7185;
+  --color-red-700: #fda4af;
+  --color-red-800: #fecdd3;
+
+  --color-blue-50: #11233c;
+  --color-blue-100: #152c4b;
+  --color-blue-200: #1d3c64;
+  --color-blue-500: #60a5fa;
+  --color-blue-700: #93c5fd;
+  --color-blue-800: #bfdbfe;
+  --color-blue-900: #dbeafe;
+}
+
+/* Tanpa `data-theme`, ikuti preferensi sistem. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --surface: #141b25;
+    --surface-2: #19212d;
+    --canvas: #0a0f16;
+    --line: #27313f;
+
+    --ink: #f1f5f9;
+    --muted: #94a3b8;
+
+    --brand: #059669;
+    --brand-strong: #047857;
+    --brand-stronger: #065f46;
+    --brand-soft: #10281f;
+
+    --shell: #070c14;
+    --shell-2: #0d1522;
+
+    --shadow-color: 0 0 0;
+
+    --color-white: #141b25;
+    --color-slate-50: #19212d;
+    --color-slate-100: #1f2835;
+    --color-slate-200: #2a3442;
+    --color-slate-300: #38465a;
+    --color-slate-400: #7d8a9c;
+    --color-slate-500: #9aa6b6;
+    --color-slate-600: #b6c0cd;
+    --color-slate-700: #d0d8e2;
+    --color-slate-800: #e4eaf2;
+    --color-slate-900: #f2f6fb;
+    --color-slate-950: #fafcff;
+
+    --color-emerald-50: #0e2a21;
+    --color-emerald-100: #12362a;
+    --color-emerald-200: #1b4c3a;
+    --color-emerald-700: #5eead4;
+    --color-emerald-800: #a7f3d0;
+    --color-emerald-900: #d1fae5;
+
+    --color-amber-50: #2e2209;
+    --color-amber-100: #3b2c0b;
+    --color-amber-200: #553f12;
+    --color-amber-600: #fbbf24;
+    --color-amber-700: #fcd34d;
+    --color-amber-800: #fde68a;
+    --color-amber-900: #fef3c7;
+
+    --color-red-50: #30141a;
+    --color-red-100: #3e1a21;
+    --color-red-200: #57222c;
+    --color-red-600: #fb7185;
+    --color-red-700: #fda4af;
+    --color-red-800: #fecdd3;
+
+    --color-blue-50: #11233c;
+    --color-blue-100: #152c4b;
+    --color-blue-200: #1d3c64;
+    --color-blue-500: #60a5fa;
+    --color-blue-700: #93c5fd;
+    --color-blue-800: #bfdbfe;
+    --color-blue-900: #dbeafe;
+  }
 }
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Mencegah efek pantul seluruh halaman, salah satu penanda paling kentara
+     bahwa sebuah layar adalah halaman web dan bukan aplikasi. */
+  overscroll-behavior-y: none;
 }
 
 body {
   margin: 0;
-  background: var(--color-canvas);
-  color: #0f172a;
+  background: var(--canvas);
+  color: var(--ink);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+
+/* Sorotan abu-abu saat elemen disentuh dihilangkan; status tekan ditangani
+   masing-masing komponen lewat kelas `active:`. */
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Judul dibuat sedikit rapat agar terbaca tegas pada ukuran besar. */
@@ -48,7 +242,7 @@ h3 {
 }
 
 :focus-visible {
-  outline: 2px solid #059669;
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
 }
 
@@ -56,7 +250,7 @@ h3 {
 @supports (scrollbar-width: thin) {
   .scroll-slim {
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
+    scrollbar-color: color-mix(in srgb, var(--muted) 45%, transparent) transparent;
   }
 }
 
@@ -66,12 +260,72 @@ h3 {
 }
 
 .scroll-slim::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: color-mix(in srgb, var(--muted) 45%, transparent);
   border-radius: 999px;
 }
 
 .scroll-slim::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* ---------------------------------------------------------- area aman --- */
+/*
+  Padding mengikuti takik dan garis gestur perangkat. Nilainya nol di
+  peramban desktop, sehingga aman dipakai di semua ukuran layar.
+*/
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Menjaga jarak bawah tetap 1rem di perangkat tanpa garis gestur, dan ikut
+   melebar bila perangkat memilikinya. */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+
+.mb-safe {
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.h-safe-bottom {
+  height: env(safe-area-inset-bottom, 0px);
+}
+
+/* Tinggi viewport yang benar di peramban seluler (bilah alamat yang menyusut
+   membuat 100vh meleset). */
+.min-h-screen-dvh {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* --------------------------------------------------------------- gerak --- */
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-sheet-up {
+  animation: sheet-up 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-fade-in {
+  animation: fade-in 0.18s ease-out;
 }
 
 @media print {

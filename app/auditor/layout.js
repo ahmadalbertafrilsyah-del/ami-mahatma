@@ -8,9 +8,9 @@ import { ROLES } from "@/lib/constants";
 const ALLOWED = [ROLES.AUDITOR];
 
 const NAV = [
-  { href: "/auditor", label: "Penugasan Saya", icon: "▦", exact: true },
-  { href: "/auditor/temuan", label: "Temuan & RTL", icon: "⚑" },
-  { href: "/auditor/rekap", label: "Rekap Skor", icon: "▤" },
+  { href: "/auditor", label: "Penugasan Saya", icon: "grid", exact: true },
+  { href: "/auditor/temuan", label: "Temuan & RTL", icon: "flag" },
+  { href: "/auditor/rekap", label: "Rekap Skor", icon: "chart" },
 ];
 
 export default function AuditorLayout({ children }) {
