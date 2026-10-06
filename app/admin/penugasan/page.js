@@ -127,7 +127,7 @@ export default function PenugasanPage() {
       {activeId && (
         <Card className="p-0">
           <Table
-            head={["Lembaga", "Status Audit", "Auditor Ditugaskan", "Aksi"]}
+            head={["Lembaga", "Kepala Sekolah", "Status Audit", "Auditor Ditugaskan", "Aksi"]}
             empty={
               loading
                 ? "Memuat..."
@@ -140,6 +140,9 @@ export default function PenugasanPage() {
                     <Td>
                       <div className="font-bold text-slate-800">{a.institutionNama}</div>
                       <div className="text-xs text-slate-500">{a.institutionJenjang}</div>
+                    </Td>
+                    <Td className="text-slate-600">
+                      {a.kepalaNama || <span className="text-slate-400">-</span>}
                     </Td>
                     <Td>
                       <Badge tone={AUDIT_STATUS_TONE[a.status]}>
