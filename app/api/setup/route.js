@@ -1,5 +1,3 @@
-import { FieldValue } from "firebase-admin/firestore";
-
 import { adminConfigStatus, getAdmin, isAdminConfigured } from "@/lib/firebase-admin";
 import { fail, ok, readJson, route } from "@/lib/api-response";
 import { ROLES } from "@/lib/constants";
@@ -17,7 +15,7 @@ export const GET = route(async () => {
     return Response.json({ configured: false, adminExists: false, reason: status.reason });
   }
   try {
-    const { db } = getAdmin();
+    const { db, FieldValue } = await getAdmin();
     return Response.json({ configured: true, adminExists: await adminExists(db) });
   } catch (err) {
     // Kredensial terbaca tetapi ditolak Google, misal project tidak cocok atau
@@ -35,7 +33,7 @@ export const POST = route(async (request) => {
     return fail("Firebase Admin belum dikonfigurasi di server.", 503);
   }
 
-  const { auth, db } = getAdmin();
+  const { auth, db, FieldValue } = await getAdmin();
 
   if (await adminExists(db)) {
     return fail("Administrator sudah ada. Inisialisasi hanya dapat dilakukan sekali.", 409);

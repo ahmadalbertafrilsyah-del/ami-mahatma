@@ -1,5 +1,3 @@
-import { FieldValue } from "firebase-admin/firestore";
-
 import { requireRole } from "@/lib/firebase-admin";
 import { fail, ok, route } from "@/lib/api-response";
 import { buildWorkbook, readSheet } from "@/lib/xlsx";
@@ -163,7 +161,7 @@ export const POST = route(async (request) => {
     return fail(err.message, err.status ?? 401);
   }
 
-  const { db } = ctx;
+  const { db, FieldValue } = ctx;
   const dryRun = new URL(request.url).searchParams.get("dryRun") === "1";
 
   let file;

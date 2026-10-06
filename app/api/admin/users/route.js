@@ -1,5 +1,3 @@
-import { FieldValue } from "firebase-admin/firestore";
-
 import { requireRole } from "@/lib/firebase-admin";
 import { fail, ok, readJson, route } from "@/lib/api-response";
 import { ROLES } from "@/lib/constants";
@@ -40,7 +38,7 @@ export const POST = route(async (request) => {
     return fail(err.message, err.status ?? 401);
   }
 
-  const { auth, db } = ctx;
+  const { auth, db, FieldValue } = ctx;
   const { email, password, nama, role, telepon = "" } = await readJson(request);
 
   if (!email || !password || !nama || !role) {
@@ -94,7 +92,7 @@ export const PATCH = route(async (request) => {
     return fail(err.message, err.status ?? 401);
   }
 
-  const { auth, db, uid: actorUid } = ctx;
+  const { auth, db, FieldValue, uid: actorUid } = ctx;
   const { uid, nama, role, active, password, telepon } = await readJson(request);
 
   if (!uid) return fail("UID pengguna wajib disertakan.");
@@ -150,7 +148,7 @@ export const DELETE = route(async (request) => {
     return fail(err.message, err.status ?? 401);
   }
 
-  const { auth, db, uid: actorUid } = ctx;
+  const { auth, db, FieldValue, uid: actorUid } = ctx;
   const uid = new URL(request.url).searchParams.get("uid");
 
   if (!uid) return fail("UID pengguna wajib disertakan.");

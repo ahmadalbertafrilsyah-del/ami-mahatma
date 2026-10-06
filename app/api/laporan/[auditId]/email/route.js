@@ -1,5 +1,3 @@
-import { FieldValue } from "firebase-admin/firestore";
-
 import { getAdmin, requireRole } from "@/lib/firebase-admin";
 import { fail, route } from "@/lib/api-response";
 import { buildReportPdf, loadAuditBundle, reportFileName } from "@/lib/pdf/build-report";
@@ -61,7 +59,7 @@ export const POST = route(async (request, { params }) => {
       attachments: [{ filename: reportFileName(audit), content: pdf, contentType: "application/pdf" }],
     });
 
-    const { db } = getAdmin();
+    const { db, FieldValue } = await getAdmin();
     await db.collection("audits").doc(auditId).set(
       {
         emailTerakhirKe: tujuan,

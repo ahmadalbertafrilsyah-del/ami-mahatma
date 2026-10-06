@@ -29,6 +29,14 @@ Akun auditor dapat dibuat dua arah: dibuatkan administrator lewat menu **Penggun
 
 ## Persiapan
 
+### 0. Versi Node.js
+
+Proyek ini **menuntut Node.js 22 ke atas**, dinyatakan pada field `engines` di `package.json`. Syarat itu datang dari `firebase-admin` 14 beserta turunannya (`@google-cloud/firestore` 9, `google-auth-library` 11) yang semuanya memasang `"node": ">=22"`.
+
+Ini bukan sekadar anjuran. Pada runtime yang lebih tua, seluruh rantai impor `firebase-admin` gagal dimuat, dan kegagalan itu terjadi **saat modul route dibaca** — sebelum kode penanganan galat mana pun sempat berjalan. Akibatnya setiap endpoint di `/api/*` menjawab HTTP 500 berbadan kosong, sementara halaman biasa tetap tampil normal karena tidak menyentuh pustaka itu. Gejalanya menyesatkan: aplikasi tampak hidup, tetapi tidak ada satu pun tindakan yang berhasil.
+
+Saat menyebarkan ke hosting, pastikan pengaturan versi Node.js-nya 22 atau lebih baru. Di Vercel: **Project Settings → General → Node.js Version**. Setelah deploy ulang, buka `/api/setup` di peramban — jawaban yang sehat berupa JSON seperti `{"configured":true,"adminExists":true}`. Bila yang muncul tetap halaman kosong atau galat, isi JSON-nya kini menyebutkan versi Node yang sedang dipakai beserta penyebabnya.
+
 ### 1. Firebase
 
 1. Buat project di [Firebase Console](https://console.firebase.google.com/).

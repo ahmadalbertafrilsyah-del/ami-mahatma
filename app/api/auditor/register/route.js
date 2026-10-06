@@ -1,5 +1,3 @@
-import { FieldValue } from "firebase-admin/firestore";
-
 import { getAdmin, isAdminConfigured } from "@/lib/firebase-admin";
 import { fail, ok, readJson, route } from "@/lib/api-response";
 import { INSTITUTION_STATUS, ROLES } from "@/lib/constants";
@@ -109,7 +107,7 @@ export const POST = route(async (request) => {
     };
   }
 
-  const { auth, db } = getAdmin();
+  const { auth, db, FieldValue } = await getAdmin();
 
   // Email ganda cukup diputuskan oleh createUser sendiri. Pemeriksaan terpisah
   // sebelumnya hanya menambah satu perjalanan jaringan tanpa memberi jawaban
