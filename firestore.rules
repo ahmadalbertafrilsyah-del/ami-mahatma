@@ -1,0 +1,119 @@
+rules_version = '2';
+
+// Aturan keamanan SIM-AMI. Peran dibaca dari dokumen users/{uid}; perubahan
+// peran oleh admin langsung berlaku tanpa perlu menerbitkan ulang token.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function profile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function activeProfile() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && profile().active != false;
+    }
+
+    function hasRole(role) {
+      return activeProfile() && profile().role == role;
+    }
+
+    function isAdmin() { return hasRole('admin'); }
+    function isAuditor() { return hasRole('auditor'); }
+
+    // Field yang benar-benar berubah pada sebuah update.
+    function changed() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function onlyFields(allowed) {
+      return changed().hasOnly(allowed);
+    }
+
+    // ---- Profil pengguna -------------------------------------------------
+    // Seluruh penulisan berjalan lewat Admin SDK pada route handler
+    // /api/admin/users dan /api/setup, yang menembus aturan ini. Karena itu
+    // klien hanya diberi hak baca.
+    match /users/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isAdmin() || isAuditor());
+      allow list: if isAdmin() || isAuditor();
+      allow write: if false;
+    }
+
+    // ---- Lembaga ---------------------------------------------------------
+    match /institutions/{institutionId} {
+
+      // Pendaftaran publik: siapa pun boleh mengirim satu lembaga baru, tetapi
+      // hanya dengan field yang ditentukan, panjang wajar, dan status pending.
+      // Membaca, mengubah, dan menghapus tetap milik petugas.
+      function validPublicRegistration() {
+        let d = request.resource.data;
+        return d.keys().hasOnly([
+              'nama', 'jenjang', 'kepalaNama', 'kepalaEmail', 'kepalaWhatsapp',
+              'status', 'sumber', 'createdAt'
+            ])
+          && d.keys().hasAll(['nama', 'kepalaNama', 'kepalaEmail', 'kepalaWhatsapp', 'status'])
+          && d.status == 'pending'
+          && d.sumber == 'publik'
+          && d.nama is string && d.nama.size() > 2 && d.nama.size() <= 150
+          && d.kepalaNama is string && d.kepalaNama.size() > 2 && d.kepalaNama.size() <= 120
+          && d.kepalaEmail is string && d.kepalaEmail.matches('.+@.+[.].+') && d.kepalaEmail.size() <= 150
+          && d.kepalaWhatsapp is string && d.kepalaWhatsapp.size() >= 8 && d.kepalaWhatsapp.size() <= 25
+          && d.jenjang is string && d.jenjang.size() <= 40
+          && d.createdAt == request.time;
+      }
+
+      allow read: if isAdmin() || isAuditor();
+      allow create: if isAdmin() || validPublicRegistration();
+      allow update, delete: if isAdmin();
+    }
+
+    // ---- Periode & instrumen --------------------------------------------
+    match /periods/{periodId} {
+      allow read: if activeProfile();
+      allow write: if isAdmin();
+    }
+
+    match /instruments/{instrumentId} {
+      allow read: if activeProfile();
+      allow write: if isAdmin();
+    }
+
+    // ---- Dokumen audit ---------------------------------------------------
+    match /audits/{auditId} {
+
+      function assignedAuditor() {
+        return isAuditor() && request.auth.uid in resource.data.auditorUids;
+      }
+
+      // Auditor hanya menyentuh hasil penilaian dan status penyelesaian;
+      // penugasan dan identitas lembaga tetap milik admin.
+      function auditorUpdateOk() {
+        return assignedAuditor()
+          && onlyFields(['answers', 'status', 'completedAt', 'completedBy', 'updatedAt'])
+          && (!('status' in changed()) || request.resource.data.status in ['draft', 'completed']);
+      }
+
+      allow get, list: if isAdmin() || (isAuditor() && request.auth.uid in resource.data.auditorUids);
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || auditorUpdateOk();
+
+      // ---- Temuan & RTL --------------------------------------------------
+      match /findings/{findingId} {
+
+        function assignedAuditorHere() {
+          return isAuditor()
+            && request.auth.uid in get(/databases/$(database)/documents/audits/$(auditId)).data.auditorUids;
+        }
+
+        allow read: if isAdmin() || assignedAuditorHere();
+        allow write: if isAdmin() || assignedAuditorHere();
+      }
+    }
+  }
+}

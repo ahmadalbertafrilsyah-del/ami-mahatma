@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  Skala lapisan. Dipakai konsisten agar tidak ada elemen yang tertimbun:
+    10  toolbar lengket di dalam konten
+    20  topbar
+    30  latar gelap menu seluler
+    40  laci sidebar
+    50  dialog
+*/
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-surface: #ffffff;
+  --color-canvas: #f6f7f9;
+  --color-line: #e6e9ee;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--color-canvas);
+  color: #0f172a;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Judul dibuat sedikit rapat agar terbaca tegas pada ukuran besar. */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: #a7f3d0;
+  color: #064e3b;
+}
+
+:focus-visible {
+  outline: 2px solid #059669;
+  outline-offset: 2px;
+}
+
+/* Scrollbar tipis supaya area bergulir di dalam kartu tidak mencolok. */
+@supports (scrollbar-width: thin) {
+  .scroll-slim {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+}
+
+.scroll-slim::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.scroll-slim::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.scroll-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  /* Elemen lengket menjadi statis agar tidak menumpuk di hasil cetak. */
+  .print-static {
+    position: static !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .print-flat {
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
