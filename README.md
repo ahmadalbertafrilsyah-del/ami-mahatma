@@ -29,13 +29,21 @@ Akun auditor dapat dibuat dua arah: dibuatkan administrator lewat menu **Penggun
 
 ## Persiapan
 
-### 0. Versi Node.js
+### 0. Runtime dan dependensi yang terkunci
 
-Proyek ini **menuntut Node.js 22 ke atas**, dinyatakan pada field `engines` di `package.json`. Syarat itu datang dari `firebase-admin` 14 beserta turunannya (`@google-cloud/firestore` 9, `google-auth-library` 11) yang semuanya memasang `"node": ">=22"`.
+Proyek ini **menuntut Node.js 22 ke atas** (`engines` di `package.json`), karena `firebase-admin` 14 beserta turunannya — `@google-cloud/firestore` 9 dan `google-auth-library` 11 — memasang `"node": ">=22"`.
 
-Ini bukan sekadar anjuran. Pada runtime yang lebih tua, seluruh rantai impor `firebase-admin` gagal dimuat, dan kegagalan itu terjadi **saat modul route dibaca** — sebelum kode penanganan galat mana pun sempat berjalan. Akibatnya setiap endpoint di `/api/*` menjawab HTTP 500 berbadan kosong, sementara halaman biasa tetap tampil normal karena tidak menyentuh pustaka itu. Gejalanya menyesatkan: aplikasi tampak hidup, tetapi tidak ada satu pun tindakan yang berhasil.
+`package.json` juga memaksa satu versi lewat `overrides`:
 
-Saat menyebarkan ke hosting, pastikan pengaturan versi Node.js-nya 22 atau lebih baru. Di Vercel: **Project Settings → General → Node.js Version**. Setelah deploy ulang, buka `/api/setup` di peramban — jawaban yang sehat berupa JSON seperti `{"configured":true,"adminExists":true}`. Bila yang muncul tetap halaman kosong atau galat, isi JSON-nya kini menyebutkan versi Node yang sedang dipakai beserta penyebabnya.
+```json
+"overrides": { "jose": "^5.10.0" }
+```
+
+Jangan dihapus. `firebase-admin` memakai `jwks-rsa` untuk mengambil kunci publik Google saat memverifikasi ID token, dan `jwks-rsa` berupa CommonJS yang memanggil `require("jose")`. Mulai versi 6, `jose` tidak lagi menyediakan build CommonJS sama sekali — peta `exports`-nya hanya punya `default` yang menunjuk berkas ESM, tanpa kondisi `require`. Node versi baru memang mengizinkan `require()` atas modul ESM, sehingga di mesin pengembang hal ini lolos tanpa gejala, tetapi runtime hosting menolaknya dengan `ERR_REQUIRE_ESM`. Versi 5 masih menyediakan build CommonJS, dan API yang dipakai `jwks-rsa` (`importJWK`, `exportSPKI`) tidak berbeda di antara keduanya.
+
+Kegagalan semacam ini punya gejala yang menyesatkan. Modul `firebase-admin` dimuat secara lambat di `lib/firebase-admin.js` justru karena itu: dengan impor statis, kegagalannya terjadi saat berkas route dibaca — sebelum kode penanganan galat mana pun sempat berjalan — sehingga hosting hanya menjawab HTTP 500 berbadan kosong untuk **seluruh** `/api/*`, sementara halaman biasa tetap tampil normal karena tidak menyentuh pustaka itu. Dimuat secara lambat, galat yang sama sampai ke pemanggil sebagai JSON yang menyebutkan berkas penyebabnya.
+
+Setelah menyebarkan, buka `/api/setup` di peramban sebagai pemeriksaan cepat. Jawaban yang sehat berupa `{"configured":true,"adminExists":true}`.
 
 ### 1. Firebase
 
