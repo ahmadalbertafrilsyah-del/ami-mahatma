@@ -1,6 +1,7 @@
 import { FieldValue } from "firebase-admin/firestore";
 
 import { getAdmin, requireRole } from "@/lib/firebase-admin";
+import { fail, route } from "@/lib/api-response";
 import { buildReportPdf, loadAuditBundle, reportFileName } from "@/lib/pdf/build-report";
 import { buildReportEmail, isMailerConfigured, sendMail } from "@/lib/mailer";
 import { APP_NAME, AUDIT_STATUS, ROLES } from "@/lib/constants";
@@ -8,19 +9,17 @@ import { APP_NAME, AUDIT_STATUS, ROLES } from "@/lib/constants";
 export const dynamic = "force-dynamic";
 
 /** Status konfigurasi email, dipakai UI untuk menonaktifkan tombol kirim. */
-export async function GET() {
-  return Response.json({ configured: isMailerConfigured() });
-}
+export const GET = route(async () => Response.json({ configured: isMailerConfigured() }));
 
 /** Mengirim laporan audit beserta lampiran PDF ke kepala sekolah. */
-export async function POST(request, { params }) {
+export const POST = route(async (request, { params }) => {
   const { auditId } = await params;
 
   let ctx;
   try {
     ctx = await requireRole(request, [ROLES.ADMIN, ROLES.AUDITOR]);
   } catch (err) {
-    return Response.json({ error: err.message }, { status: err.status ?? 400 });
+    return fail(err.message, err.status ?? 401);
   }
 
   if (!isMailerConfigured()) {
@@ -75,6 +74,6 @@ export async function POST(request, { params }) {
 
     return Response.json({ ok: true, to: tujuan });
   } catch (err) {
-    return Response.json({ error: err.message }, { status: err.status ?? 500 });
+    return fail(err.message, err.status ?? 500);
   }
-}
+});

@@ -153,8 +153,8 @@ export default function PenggunaPage() {
       )}
 
       {pending.length > 0 && (
-        <Card className="mb-4 border-amber-300/70 bg-amber-50 p-0">
-          <div className="border-b border-amber-300/50 px-5 py-4">
+        <Card className="mb-4 border-amber-200 bg-amber-50 p-0">
+          <div className="border-b border-amber-200 px-5 py-4">
             <h3 className="font-semibold text-amber-900">
               {pending.length} pendaftaran auditor menunggu persetujuan
             </h3>
@@ -162,7 +162,7 @@ export default function PenggunaPage() {
               Akun ini sudah dibuat tetapi belum dapat masuk ke dashboard sampai Anda menyetujuinya.
             </p>
           </div>
-          <ul className="divide-y divide-amber-300/40">
+          <ul className="divide-y divide-amber-200">
             {pending.map((u) => (
               <li
                 key={u.id}

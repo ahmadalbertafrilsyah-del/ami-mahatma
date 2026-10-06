@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/firebase-admin";
+import { fail, route } from "@/lib/api-response";
 import { buildReportPdf, loadAuditBundle, reportFileName } from "@/lib/pdf/build-report";
 import { ROLES } from "@/lib/constants";
 import { APP_NAME } from "@/lib/constants";
@@ -6,14 +7,14 @@ import { APP_NAME } from "@/lib/constants";
 export const dynamic = "force-dynamic";
 
 /** Mengunduh laporan audit sebagai berkas PDF A4. */
-export async function GET(request, { params }) {
+export const GET = route(async (request, { params }) => {
   const { auditId } = await params;
 
   let ctx;
   try {
     ctx = await requireRole(request, [ROLES.ADMIN, ROLES.AUDITOR]);
   } catch (err) {
-    return Response.json({ error: err.message }, { status: err.status ?? 400 });
+    return fail(err.message, err.status ?? 401);
   }
 
   try {
@@ -33,6 +34,6 @@ export async function GET(request, { params }) {
       },
     });
   } catch (err) {
-    return Response.json({ error: err.message }, { status: err.status ?? 500 });
+    return fail(err.message, err.status ?? 500);
   }
-}
+});

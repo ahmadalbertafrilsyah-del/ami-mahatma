@@ -91,12 +91,6 @@ export function DashboardShell({ nav, children }) {
     return () => document.removeEventListener("mousedown", onDown);
   }, [menu]);
 
-  // Berpindah halaman menutup lapisan yang sedang terbuka.
-  useEffect(() => {
-    setDrawer(false);
-    setMenu(false);
-  }, [pathname]);
-
   async function handleLogout() {
     await logout();
     router.replace("/login");
@@ -135,6 +129,7 @@ export function DashboardShell({ nav, children }) {
               href={item.href}
               aria-current={active ? "page" : undefined}
               title={collapsed ? item.label : undefined}
+              onClick={closeLayers}
               className={cx(
                 "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                 collapsed && "lg:justify-center lg:px-0",
@@ -207,7 +202,7 @@ export function DashboardShell({ nav, children }) {
 
       <aside
         className={cx(
-          "pt-safe fixed inset-y-0 left-0 z-40 flex w-[17rem] flex-col bg-shell transition-transform duration-200 ease-out",
+          "pt-safe fixed inset-y-0 left-0 z-40 flex w-[17rem] flex-col bg-shell-gradient transition-transform duration-200 ease-out",
           "lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0 lg:transition-[width] lg:duration-200",
           collapsed ? "lg:w-[4.75rem]" : "lg:w-[17rem]",
           drawer ? "translate-x-0 shadow-2xl" : "-translate-x-full"
@@ -314,6 +309,7 @@ export function DashboardShell({ nav, children }) {
                   key={item.href}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
+                  onClick={closeLayers}
                   className={cx(
                     "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1.5 transition-colors",
                     active ? "text-brand" : "text-slate-400 active:bg-slate-100"

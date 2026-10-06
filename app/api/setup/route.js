@@ -1,6 +1,7 @@
 import { FieldValue } from "firebase-admin/firestore";
 
 import { adminConfigStatus, getAdmin, isAdminConfigured } from "@/lib/firebase-admin";
+import { fail, ok, readJson, route } from "@/lib/api-response";
 import { ROLES } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +11,7 @@ async function adminExists(db) {
   return !snap.empty;
 }
 
-export async function GET() {
+export const GET = route(async () => {
   const status = adminConfigStatus();
   if (!status.configured) {
     return Response.json({ configured: false, adminExists: false, reason: status.reason });
@@ -23,35 +24,29 @@ export async function GET() {
     // Firestore belum diaktifkan.
     return Response.json({ configured: false, adminExists: false, reason: err.message });
   }
-}
+});
 
 /**
  * Membuat administrator pertama. Endpoint menutup diri begitu satu akun
  * administrator sudah ada, sehingga tidak bisa dipakai ulang sebagai pintu masuk.
  */
-export async function POST(request) {
+export const POST = route(async (request) => {
   if (!isAdminConfigured()) {
-    return Response.json(
-      { error: "Firebase Admin belum dikonfigurasi di server." },
-      { status: 503 }
-    );
+    return fail("Firebase Admin belum dikonfigurasi di server.", 503);
   }
 
   const { auth, db } = getAdmin();
 
   if (await adminExists(db)) {
-    return Response.json(
-      { error: "Administrator sudah ada. Inisialisasi hanya dapat dilakukan sekali." },
-      { status: 409 }
-    );
+    return fail("Administrator sudah ada. Inisialisasi hanya dapat dilakukan sekali.", 409);
   }
 
-  const { email, password, nama } = await request.json().catch(() => ({}));
+  const { email, password, nama } = await readJson(request);
   if (!email || !password || !nama) {
-    return Response.json({ error: "Nama, email, dan kata sandi wajib diisi." }, { status: 400 });
+    return fail("Nama, email, dan kata sandi wajib diisi.");
   }
   if (String(password).length < 8) {
-    return Response.json({ error: "Kata sandi minimal 8 karakter." }, { status: 400 });
+    return fail("Kata sandi minimal 8 karakter.");
   }
 
   try {
@@ -78,8 +73,8 @@ export async function POST(request) {
       { merge: true }
     );
 
-    return Response.json({ ok: true, uid: userRecord.uid });
+    return ok({ uid: userRecord.uid });
   } catch (err) {
-    return Response.json({ error: err.message }, { status: 400 });
+    return fail(err.message);
   }
-}
+});

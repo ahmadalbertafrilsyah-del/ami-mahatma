@@ -34,10 +34,28 @@ export function AuthProvider({ children }) {
         return;
       }
 
+      // Kembali ke status "memuat" sampai dokumen users/{uid} tiba.
+      //
+      // Tanpa dua baris ini, tepat setelah pengguna berhasil masuk terjadi satu
+      // render dengan `user` sudah terisi, `profile` masih null, dan `loading`
+      // terlanjur false — nilai itu sisa dari pemanggilan pertama yang
+      // melaporkan "belum ada sesi". Penjaga peran membaca kombinasi tersebut
+      // sebagai akun tidak aktif, sehingga halaman /akun-nonaktif berkelebat
+      // setiap kali selesai masuk dan baru benar setelah halaman dimuat ulang.
+      setProfile(null);
+      setLoading(true);
+
       // Dipantau real time agar perubahan peran oleh Admin langsung berlaku.
       unsubProfile = onSnapshot(
         doc(db, "users", nextUser.uid),
         (snap) => {
+          // "Dokumen tidak ada" yang masih berasal dari cache lokal belum tentu
+          // benar: pada pengguna yang baru pertama kali masuk di perangkat ini,
+          // cache memang kosong dan jawaban server belum tiba. Menerimanya
+          // mentah-mentah akan melempar pengguna ke /akun-nonaktif. Jawaban
+          // negatif baru dipercaya setelah dikonfirmasi server.
+          if (!snap.exists() && snap.metadata.fromCache) return;
+
           setProfile(snap.exists() ? { uid: snap.id, ...snap.data() } : null);
           setLoading(false);
         },

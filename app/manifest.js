@@ -7,9 +7,12 @@ import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE } from "@/lib/constants";
  */
 export default function manifest() {
   const org = process.env.NEXT_PUBLIC_ORG_NAME;
+  // Nama organisasi kerap diisi sama dengan nama aplikasi; tanpa penjagaan ini
+  // hasilnya menjadi "SIM-AMI SIM-AMI" di layar utama ponsel.
+  const pakaiOrg = org && org.trim() && org.trim() !== APP_NAME;
 
   return {
-    name: org ? `${APP_NAME} ${org}` : `${APP_NAME} — ${APP_TAGLINE}`,
+    name: pakaiOrg ? `${APP_NAME} ${org.trim()}` : `${APP_NAME} — ${APP_TAGLINE}`,
     short_name: APP_NAME,
     description: APP_DESCRIPTION,
     start_url: "/",

@@ -9,6 +9,7 @@ Dibangun dengan Next.js 16 (App Router) + Tailwind CSS v4, Firebase Authenticati
 ## Alur kerja
 
 1. **Pendaftaran publik.** Di halaman depan (`/`), kepala sekolah mengisi nama, email, nomor WhatsApp, dan nama sekolah. Data langsung masuk ke koleksi `institutions` berstatus `pending`.
+   Calon auditor punya jalur sendiri di `/daftar-auditor`: ia membuat akunnya dan — bila mau — sekalian mendaftarkan satu lembaga. Akun auditor hasil pendaftaran mandiri tersimpan dengan `active: false` dan `pendingApproval: true`, sehingga baru dapat masuk ke dashboard setelah disetujui administrator di menu **Pengguna**.
 2. **Verifikasi.** Administrator memeriksa pendaftaran di menu **Lembaga**, menandainya *Terverifikasi*, lalu membuka periode AMI dan menugaskan auditor.
 3. **Penilaian.** Auditor membuka penugasannya dan mengisi **ceklis** indikator (skala 1–4) beserta catatan kondisi dan bukti pendukung.
 4. **Temuan & tindak lanjut.** Indikator berskor 1–2 muncul sebagai kandidat temuan. Auditor menetapkannya menjadi temuan, mencatat akar penyebab dan rencana perbaikan, lalu menutupnya setelah perbaikan terbukti.
@@ -21,6 +22,8 @@ Dibangun dengan Next.js 16 (App Router) + Tailwind CSS v4, Firebase Authenticati
 | Administrator | Ringkasan, Pengguna, Lembaga, Periode AMI, Instrumen, Penugasan Auditor, Laporan |
 | Auditor | Penugasan Saya, Temuan & RTL, Rekap Skor |
 | Kepala sekolah | *Tidak punya akun* — cukup formulir pendaftaran di halaman depan |
+
+Akun auditor dapat dibuat dua arah: dibuatkan administrator lewat menu **Pengguna**, atau didaftarkan sendiri lewat `/daftar-auditor` lalu disetujui administrator.
 
 ---
 
@@ -86,7 +89,7 @@ Buka <http://localhost:3000>.
 1. Buka `/setup` untuk membuat **administrator pertama**. Halaman ini menutup diri sendiri begitu satu akun admin ada.
 2. Masuk sebagai admin, lalu:
    - **Instrumen** → *Seed Instrumen Bawaan* (6 area, 18 indikator) dan sunting sesuai kebutuhan.
-   - **Pengguna** → buat akun auditor.
+   - **Pengguna** → buat akun auditor, dan setujui pendaftaran auditor mandiri yang masuk.
    - **Lembaga** → verifikasi pendaftaran yang masuk, atau tambahkan lembaga secara manual.
    - **Periode AMI** → buat periode, pilih instrumen, set status **Berjalan**, lalu klik *Generate Audit* (hanya lembaga berstatus Terverifikasi yang dibuatkan dokumen).
    - **Penugasan Auditor** → tetapkan auditor untuk tiap dokumen audit.
@@ -96,9 +99,11 @@ Buka <http://localhost:3000>.
 ## Struktur data Firestore
 
 ```
-users/{uid}                 uid, email, nama, role (admin|auditor), telepon, active
+users/{uid}                 uid, email, nama, role (admin|auditor), telepon, active,
+                            pendingApproval, instansi, sumber (mandiri bila daftar sendiri)
 institutions/{id}           nama, jenjang, kepalaNama, kepalaEmail, kepalaWhatsapp,
-                            npsn, alamat, kota, status (pending|aktif|ditolak), sumber
+                            npsn, alamat, kota, status (pending|aktif|ditolak),
+                            sumber (publik|admin|auditor), didaftarkanOlehUid
 instruments/{id}            nama, versi, rubrics[], areas[{ id, title, questions[] }]
 periods/{id}                nama, tahun, instrumentId, mulai, selesai, status
 audits/{id}                 periodId, institutionId, instrumentId, status, auditorUids[],
@@ -117,11 +122,13 @@ Status temuan: `open` → `in_progress` → `closed`.
 app/
   page.js     halaman depan publik berisi formulir pendaftaran lembaga
   admin/      auditor/     dua dashboard beserta layout dan penjaga peran
-  api/        setup, admin/users, laporan/[auditId] (PDF + email),
+  api/        setup, admin/users, auditor/register, laporan/[auditId] (PDF + email),
               cloudinary/sign, cloudinary/destroy
-  login/      setup/       akun-nonaktif/
-components/   auth-provider, dashboard-shell, audit-form, audit-report,
-              report-actions, evidence-uploader, brand-logo, ui
+  login/      setup/       akun-nonaktif/      daftar-auditor/
+  manifest.js  manifest PWA agar aplikasi dapat dipasang ke layar utama
+components/   auth-provider, theme-provider, dashboard-shell, audit-form,
+              audit-report, report-actions, evidence-uploader, brand-logo,
+              icons, ui
 lib/          firebase (klien), firebase-admin (server), cloudinary, upload,
               mailer, pdf/ (dokumen laporan A4), constants, scoring,
               hooks, format, default-instrument

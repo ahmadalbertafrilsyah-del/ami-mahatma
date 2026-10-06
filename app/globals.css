@@ -92,7 +92,6 @@
     `border-slate-200`, `divide-slate-100`, ...) menunjuk ke variabel ini,
     jadi seluruh halaman ikut gelap tanpa disentuh satu per satu.
   */
-  --color-white: #141b25;
   --color-slate-50: #19212d;
   --color-slate-100: #1f2835;
   --color-slate-200: #2a3442;
@@ -161,7 +160,6 @@
 
     --shadow-color: 0 0 0;
 
-    --color-white: #141b25;
     --color-slate-50: #19212d;
     --color-slate-100: #1f2835;
     --color-slate-200: #2a3442;
@@ -296,6 +294,12 @@ h3 {
 .min-h-screen-dvh {
   min-height: 100vh;
   min-height: 100dvh;
+}
+
+/* Sidebar memakai gradasi tipis, bukan satu bidang rata, agar bagian atas
+   tempat logo terasa sedikit terangkat dari daftar menu di bawahnya. */
+.bg-shell-gradient {
+  background: linear-gradient(175deg, var(--shell-2) 0%, var(--shell) 42%, var(--shell) 100%);
 }
 
 /* --------------------------------------------------------------- gerak --- */
