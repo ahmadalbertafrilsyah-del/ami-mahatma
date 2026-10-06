@@ -453,7 +453,7 @@ function InstrumenEditor({ id, instrument }) {
         </div>
       </Card>
 
-      <div className="print-static sticky bottom-0 z-10 -mx-4 mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 bg-surface/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
+      <div className="print-static bottom-above-nav sticky z-[26] -mx-4 mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 bg-surface/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
         <p className="text-xs text-slate-500">
           {draft.areas.length} area · {totalIndicators} indikator
         </p>

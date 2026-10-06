@@ -94,7 +94,7 @@ export default function DaftarAuditorPage() {
   return (
     <div className="min-h-screen-dvh">
       <header className="pt-safe sticky top-0 z-20 border-b border-slate-200/80 bg-surface/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-4xl items-center gap-3 px-4 sm:px-6">
+        <div className="mx-auto flex h-14 max-w-4xl items-center gap-2 px-4 sm:h-16 sm:px-6">
           <BrandLogo size={36} />
           <span className="min-w-0 flex-1">
             <strong className="block truncate text-sm font-semibold text-slate-900">
@@ -111,7 +111,7 @@ export default function DaftarAuditorPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-14">
         {done ? (
           <Card className="mx-auto max-w-lg text-center">
             <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
@@ -149,11 +149,11 @@ export default function DaftarAuditorPage() {
           </Card>
         ) : (
           <>
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <p className="text-xs font-bold tracking-[0.14em] text-emerald-700 uppercase">
                 Pendaftaran Auditor
               </p>
-              <h1 className="mt-2 text-3xl font-bold tracking-tight text-balance text-slate-900 sm:text-4xl">
+              <h1 className="mt-2 text-[1.75rem] leading-tight font-bold tracking-tight text-balance text-slate-900 sm:text-4xl">
                 Daftarkan diri sebagai auditor
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-pretty text-slate-500">
@@ -163,7 +163,7 @@ export default function DaftarAuditorPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="grid gap-5 lg:grid-cols-2 lg:items-start">
+            <form onSubmit={handleSubmit} className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:items-start">
               {/* ------------------------------------------------------ akun */}
               <Card className="p-0">
                 <div className="border-b border-slate-200/80 px-5 py-4">
@@ -353,24 +353,36 @@ export default function DaftarAuditorPage() {
               <div className="lg:col-span-2">
                 {error && <Notice tone="red">{error}</Notice>}
 
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="max-w-md text-xs leading-relaxed text-slate-400">
-                    Dengan mendaftar, Anda menyetujui bahwa data di atas diperiksa administrator
-                    untuk keperluan audit mutu internal.
-                  </p>
-                  <Button type="submit" className="w-full py-3 sm:w-auto sm:px-8" disabled={busy}>
-                    {busy && <Spinner />}
-                    {busy ? "Mengirim..." : "Daftar sebagai Auditor"}
-                  </Button>
-                </div>
+                <p className="mt-4 text-xs leading-relaxed text-slate-400 sm:max-w-md">
+                  Dengan mendaftar, Anda menyetujui bahwa data di atas diperiksa administrator untuk
+                  keperluan audit mutu internal.
+                </p>
 
-                <p className="mt-6 text-center text-sm text-slate-500 sm:text-left">
+                <p className="mt-5 text-center text-sm text-slate-500 sm:text-left">
                   Sudah punya akun?{" "}
                   <Link href="/login" className="font-semibold text-emerald-700 hover:underline">
                     Masuk di sini
                   </Link>
                   .
                 </p>
+
+                {/*
+                  Formulir ini panjang. Di layar sempit tombol kirim dibuat
+                  menempel di tepi bawah layar, sehingga selalu terjangkau tanpa
+                  harus menggulir sampai habis — perilaku yang lazim pada
+                  formulir panjang di aplikasi ponsel. Mulai lebar sm tombolnya
+                  kembali mengalir biasa di dalam halaman.
+                */}
+                <div className="pb-safe sticky bottom-0 z-20 -mx-4 mt-5 border-t border-slate-200/80 bg-surface/90 px-4 pt-3 backdrop-blur-md sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:pb-0 sm:backdrop-blur-none">
+                  <Button
+                    type="submit"
+                    className="w-full py-3 sm:w-auto sm:px-8"
+                    disabled={busy}
+                  >
+                    {busy && <Spinner />}
+                    {busy ? "Mengirim..." : "Daftar sebagai Auditor"}
+                  </Button>
+                </div>
               </div>
             </form>
           </>

@@ -127,6 +127,8 @@ export default function AuditorAuditPage() {
         updatedAt: serverTimestamp(),
       });
       setMessage({ tone: "emerald", text: "Audit ditandai selesai." });
+    } catch (err) {
+      setMessage({ tone: "red", text: `Gagal menandai selesai: ${err.message}` });
     } finally {
       setBusy(false);
     }
@@ -134,11 +136,15 @@ export default function AuditorAuditPage() {
 
   async function reopen() {
     if (!confirm("Buka kembali audit ini agar ceklis dapat disunting?")) return;
-    await updateDoc(doc(db, "audits", id), {
-      status: AUDIT_STATUS.DRAFT,
-      updatedAt: serverTimestamp(),
-    });
-    setMessage({ tone: "emerald", text: "Audit dibuka kembali." });
+    try {
+      await updateDoc(doc(db, "audits", id), {
+        status: AUDIT_STATUS.DRAFT,
+        updatedAt: serverTimestamp(),
+      });
+      setMessage({ tone: "emerald", text: "Audit dibuka kembali." });
+    } catch (err) {
+      setMessage({ tone: "red", text: `Gagal membuka kembali audit: ${err.message}` });
+    }
   }
 
   function openFindingFromCandidate(candidate) {
@@ -203,7 +209,12 @@ export default function AuditorAuditPage() {
 
   async function removeFinding(finding) {
     if (!confirm(`Hapus temuan "${finding.judul}" beserta rencana tindak lanjutnya?`)) return;
-    await deleteDoc(doc(db, "audits", id, "findings", finding.id));
+    try {
+      await deleteDoc(doc(db, "audits", id, "findings", finding.id));
+      setMessage({ tone: "emerald", text: "Temuan dihapus." });
+    } catch (err) {
+      setMessage({ tone: "red", text: `Gagal menghapus temuan: ${err.message}` });
+    }
   }
 
   return (

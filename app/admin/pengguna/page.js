@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api-client";
 import { ROLES, ROLE_LABEL } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import { authHeaders, useAuth } from "@/components/auth-provider";
+import { ExcelImportModal } from "@/components/excel-import";
 import {
   Badge,
   Button,
@@ -41,6 +42,7 @@ export default function PenggunaPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [banner, setBanner] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   // Auditor yang mendaftar sendiri lewat /daftar-auditor menunggu persetujuan:
   // akunnya ada, tetapi belum aktif sampai administrator menyetujuinya.
@@ -143,7 +145,14 @@ export default function PenggunaPage() {
         eyebrow="Manajemen Akses"
         title="Pengguna"
         description="Kelola akun administrator dan auditor beserta peran serta status aktifnya."
-        actions={<Button onClick={openCreate}>+ Tambah Pengguna</Button>}
+        actions={
+          <>
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              Impor Excel
+            </Button>
+            <Button onClick={openCreate}>+ Tambah Pengguna</Button>
+          </>
+        }
       />
 
       {banner && (
@@ -287,6 +296,27 @@ export default function PenggunaPage() {
             : null}
         </Table>
       </Card>
+
+      <ExcelImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        title="Impor Pengguna dari Excel"
+        description="Tambahkan banyak akun auditor sekaligus lewat satu berkas."
+        endpoint="/api/admin/users/import"
+        templateName="template-impor-pengguna-sim-ami.xlsx"
+        satuan="akun"
+        limitNote="Format .xlsx, maksimal 2 MB dan 300 baris. Berkas diperiksa lebih dulu — belum ada akun yang dibuat pada tahap ini."
+        rowMeta={(r) =>
+          [r.email, r.role ? (ROLE_LABEL[r.role] ?? r.role) : null].filter(Boolean).join(" · ")
+        }
+        successNote="Mintalah setiap pengguna mengganti kata sandi awalnya lewat menu “Lupa kata sandi” pada halaman masuk."
+        onFinished={(hasil) =>
+          setBanner({
+            tone: hasil.gagal > 0 ? "amber" : "emerald",
+            text: `Impor selesai: ${hasil.dibuat} akun dibuat, ${hasil.gagal} baris dilewati.`,
+          })
+        }
+      />
 
       <Modal
         open={Boolean(modal)}

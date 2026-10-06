@@ -89,12 +89,31 @@ Buka <http://localhost:3000>.
 1. Buka `/setup` untuk membuat **administrator pertama**. Halaman ini menutup diri sendiri begitu satu akun admin ada.
 2. Masuk sebagai admin, lalu:
    - **Instrumen** → *Seed Instrumen Bawaan* (6 area, 18 indikator) dan sunting sesuai kebutuhan.
-   - **Pengguna** → buat akun auditor, dan setujui pendaftaran auditor mandiri yang masuk.
+   - **Pengguna** → buat akun auditor satu per satu, impor banyak akun sekaligus dari berkas Excel, dan setujui pendaftaran auditor mandiri yang masuk.
+   - **Lembaga** → impor banyak lembaga sekaligus dari Excel, dan hapus lembaga bila perlu; lembaga yang masih punya dokumen audit meminta konfirmasi tambahan karena audit dan temuannya ikut terhapus.
    - **Lembaga** → verifikasi pendaftaran yang masuk, atau tambahkan lembaga secara manual.
    - **Periode AMI** → buat periode, pilih instrumen, set status **Berjalan**, lalu klik *Generate Audit* (hanya lembaga berstatus Terverifikasi yang dibuatkan dokumen).
    - **Penugasan Auditor** → tetapkan auditor untuk tiap dokumen audit.
 
 ---
+
+## Impor dari Excel
+
+Tersedia di dua tempat: menu **Pengguna** → **Impor Excel** untuk akun auditor, dan menu **Lembaga** → **Impor Excel** untuk satuan pendidikan. Keduanya memakai alur yang sama.
+
+1. **Unduh template.** Berkas .xlsx beserta lembar **Petunjuk**. Seluruh kolom berformat teks agar angka nol di depan nomor telepon dan NPSN tidak terpangkas Excel.
+2. **Unggah berkas terisi.** Berkas hanya **diperiksa** lebih dulu — belum ada data yang disimpan. Pratinjau menampilkan status per baris: siap, atau gagal beserta alasannya.
+3. **Impor.** Hasil akhirnya dirangkum per baris; satu baris yang gagal tidak membatalkan sisanya.
+
+| | Pengguna | Lembaga |
+| --- | --- | --- |
+| Kolom wajib | Nama Lengkap, Email, Kata Sandi | Nama Lembaga |
+| Kolom lain | Telepon, Peran (auditor/admin) | Jenjang, NPSN, Kota, Alamat, Nama/Email/WhatsApp kepala sekolah, Status |
+| Baris ditolak bila | email ganda di berkas, email sudah terdaftar, kata sandi di bawah 8 karakter, peran tidak dikenali | nama ganda di berkas, nama sudah terdaftar, status tidak dikenali, email kepala tidak valid |
+
+Batas satu berkas: 300 baris dan 2 MB. Nama kolom dicocokkan secara longgar — "Nama Sekolah", "Kabupaten", "No Telepon", dan "WhatsApp" ikut dikenali — dan baris judul dicari sampai sepuluh baris pertama, sehingga berkas yang diberi judul di bagian atas tetap terbaca. Nomor yang terlanjur tersimpan sebagai angka dipulihkan nol di depannya.
+
+Kata sandi pada berkas pengguna hanya berlaku sebagai kata sandi awal. Mintalah setiap pengguna menggantinya lewat **Lupa kata sandi** pada halaman masuk.
 
 ## Struktur data Firestore
 
@@ -122,13 +141,14 @@ Status temuan: `open` → `in_progress` → `closed`.
 app/
   page.js     halaman depan publik berisi formulir pendaftaran lembaga
   admin/      auditor/     dua dashboard beserta layout dan penjaga peran
-  api/        setup, admin/users, auditor/register, laporan/[auditId] (PDF + email),
-              cloudinary/sign, cloudinary/destroy
+  api/        setup, admin/users, admin/users/import, admin/institutions,
+              admin/institutions/import, auditor/register,
+              laporan/[auditId] (PDF + email), cloudinary/sign, cloudinary/destroy
   login/      setup/       akun-nonaktif/      daftar-auditor/
   manifest.js  manifest PWA agar aplikasi dapat dipasang ke layar utama
 components/   auth-provider, theme-provider, dashboard-shell, audit-form,
-              audit-report, report-actions, evidence-uploader, brand-logo,
-              icons, ui
+              audit-report, report-actions, evidence-uploader, excel-import,
+              brand-logo, icons, ui
 lib/          firebase (klien), firebase-admin (server), cloudinary, upload,
               mailer, pdf/ (dokumen laporan A4), constants, scoring,
               hooks, format, default-instrument

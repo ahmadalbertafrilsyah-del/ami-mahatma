@@ -90,8 +90,12 @@ export default function InstrumenPage() {
       return;
     }
     if (!confirm(`Hapus instrumen "${instrument.nama}"?`)) return;
-    await deleteDoc(doc(db, "instruments", instrument.id));
-    setBanner("Instrumen dihapus.");
+    try {
+      await deleteDoc(doc(db, "instruments", instrument.id));
+      setBanner("Instrumen dihapus.");
+    } catch (err) {
+      setError(`Gagal menghapus instrumen: ${err.message}`);
+    }
   }
 
   return (

@@ -160,7 +160,11 @@ export default function PeriodePage() {
       return;
     }
     if (!confirm(`Hapus periode "${period.nama}"?`)) return;
-    await deleteDoc(doc(db, "periods", period.id));
+    try {
+      await deleteDoc(doc(db, "periods", period.id));
+    } catch (err) {
+      alert(`Gagal menghapus periode: ${err.message}`);
+    }
   }
 
   return (

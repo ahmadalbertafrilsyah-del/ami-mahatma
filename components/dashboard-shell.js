@@ -28,8 +28,42 @@ const COLLAPSE_KEY = "sim-ami-sidebar-collapsed";
 const BOTTOM_SLOTS = 4;
 
 function NavIcon({ name, className }) {
-  const Icon = NAV_ICONS[name] ?? NAV_ICONS.grid;
+  const Icon = name === "dots" ? IconDots : (NAV_ICONS[name] ?? NAV_ICONS.grid);
   return <Icon className={className} />;
+}
+
+/**
+ * Satu tombol pada navigasi bawah.
+ *
+ * Ikon duduk di dalam "pil" yang hanya tampak saat tab itu aktif — penanda
+ * posisi yang lazim pada aplikasi ponsel, dan jauh lebih mudah dikenali
+ * sekilas dibanding sekadar perbedaan warna.
+ */
+function BottomTab({ as: Tag = "button", icon, label, active, className, ...rest }) {
+  return (
+    <Tag
+      aria-current={active && Tag !== "button" ? "page" : undefined}
+      aria-pressed={Tag === "button" ? active : undefined}
+      className={cx(
+        "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl py-1 transition-colors select-none",
+        active ? "text-brand" : "text-slate-400",
+        className
+      )}
+      {...rest}
+    >
+      <span
+        className={cx(
+          "grid h-7 w-14 place-items-center rounded-full transition-colors",
+          active ? "bg-brand/12" : "bg-transparent"
+        )}
+      >
+        <NavIcon name={icon} className={cx("size-[22px]", active && "stroke-[2.1]")} />
+      </span>
+      <span className="w-full truncate px-0.5 text-center text-[10px] leading-tight font-semibold">
+        {label}
+      </span>
+    </Tag>
+  );
 }
 
 export function DashboardShell({ nav, children }) {
@@ -120,7 +154,12 @@ export function DashboardShell({ nav, children }) {
         </button>
       </div>
 
-      <nav className="scroll-slim flex-1 space-y-1 overflow-y-auto px-3 pb-4">
+      <nav
+        className={cx(
+          "scroll-slim flex-1 space-y-1 overflow-x-hidden overflow-y-auto pb-4",
+          collapsed ? "px-3 lg:px-2.5" : "px-3"
+        )}
+      >
         {nav.map((item) => {
           const active = item.href === current?.href;
           return (
@@ -131,7 +170,7 @@ export function DashboardShell({ nav, children }) {
               title={collapsed ? item.label : undefined}
               onClick={closeLayers}
               className={cx(
-                "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                 collapsed && "lg:justify-center lg:px-0",
                 active ? "bg-white/10 text-white" : "text-white/60 hover:bg-white/5 hover:text-white"
               )}
@@ -141,13 +180,6 @@ export function DashboardShell({ nav, children }) {
               )}
               <NavIcon name={item.icon} className="size-5 shrink-0" />
               <span className={cx("truncate", collapsed && "lg:hidden")}>{item.label}</span>
-
-              {/* Keterangan melayang menggantikan label yang disembunyikan. */}
-              {collapsed && (
-                <span className="pointer-events-none absolute left-full z-50 ml-2 hidden rounded-lg bg-shell-2 px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-white opacity-0 shadow-lg ring-1 ring-white/10 transition-opacity group-hover:opacity-100 lg:block">
-                  {item.label}
-                </span>
-              )}
             </Link>
           );
         })}
@@ -202,7 +234,7 @@ export function DashboardShell({ nav, children }) {
 
       <aside
         className={cx(
-          "pt-safe fixed inset-y-0 left-0 z-40 flex w-[17rem] flex-col bg-shell-gradient transition-transform duration-200 ease-out",
+          "app-chrome pt-safe fixed inset-y-0 left-0 z-40 flex w-[17rem] flex-col bg-shell-gradient transition-transform duration-200 ease-out",
           "lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0 lg:transition-[width] lg:duration-200",
           collapsed ? "lg:w-[4.75rem]" : "lg:w-[17rem]",
           drawer ? "translate-x-0 shadow-2xl" : "-translate-x-full"
@@ -212,7 +244,7 @@ export function DashboardShell({ nav, children }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="print-static pt-safe sticky top-0 z-20 border-b border-slate-200/80 bg-surface/85 backdrop-blur-md">
+        <header className="app-chrome print-static pt-safe sticky top-0 z-20 border-b border-slate-200/80 bg-surface/85 backdrop-blur-xl">
           <div className="flex h-16 items-center gap-2 px-3 sm:px-6">
             <button
               type="button"
@@ -235,11 +267,16 @@ export function DashboardShell({ nav, children }) {
               {collapsed ? <IconChevronRight /> : <IconChevronLeft />}
             </button>
 
+            {/* Di layar sempit judul halaman berdiri sendiri dan besar, seperti
+                bilah atas aplikasi ponsel. Baris nama aplikasi di atasnya hanya
+                muncul mulai lebar sm, tempat ruangnya memang tersedia. */}
             <div className="min-w-0 flex-1 px-1">
-              <p className="truncate text-[11px] font-semibold tracking-wide text-slate-400 uppercase">
+              <p className="hidden truncate text-[11px] font-semibold tracking-wide text-slate-400 uppercase sm:block">
                 {APP_NAME}
               </p>
-              <h2 className="truncate text-sm font-semibold text-slate-900">{current?.label}</h2>
+              <h2 className="truncate text-base font-bold text-slate-900 sm:text-sm sm:font-semibold">
+                {current?.label}
+              </h2>
             </div>
 
             <ThemeToggleButton />
@@ -292,51 +329,37 @@ export function DashboardShell({ nav, children }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 py-6 pb-28 sm:px-6 sm:py-8 lg:pb-8">
+        <main className="pb-bottomnav mx-auto w-full max-w-[90rem] flex-1 px-4 py-6 sm:px-6 sm:py-8">
           {children}
         </main>
 
         {/* ------------------------------------------- navigasi bawah seluler */}
         <nav
-          className="print-static fixed inset-x-0 bottom-0 z-[25] border-t border-slate-200/80 bg-surface/90 backdrop-blur-md lg:hidden"
+          className="app-chrome print-static fixed inset-x-0 bottom-0 z-[25] border-t border-slate-200/80 bg-surface/92 backdrop-blur-xl lg:hidden"
           aria-label="Navigasi utama"
         >
-          <div className="mx-auto flex max-w-xl items-stretch justify-around px-1 pt-1">
-            {bottomItems.map((item) => {
-              const active = item.href === current?.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  onClick={closeLayers}
-                  className={cx(
-                    "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1.5 transition-colors",
-                    active ? "text-brand" : "text-slate-400 active:bg-slate-100"
-                  )}
-                >
-                  <NavIcon name={item.icon} className={cx("size-6", active && "stroke-2")} />
-                  <span className="w-full truncate text-center text-[10px] leading-tight font-semibold">
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
+          <div className="mx-auto flex h-[var(--bottomnav-h)] max-w-xl items-stretch justify-around px-1 pt-1.5">
+            {bottomItems.map((item) => (
+              <BottomTab
+                key={item.href}
+                as={Link}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                active={item.href === current?.href}
+                onClick={closeLayers}
+              />
+            ))}
 
             {hasOverflow && (
-              <button
+              <BottomTab
+                as="button"
                 type="button"
+                icon="dots"
+                label="Lainnya"
+                active={overflowActive}
                 onClick={() => setDrawer(true)}
-                className={cx(
-                  "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1.5 transition-colors",
-                  overflowActive ? "text-brand" : "text-slate-400 active:bg-slate-100"
-                )}
-              >
-                <IconDots className="size-6" />
-                <span className="w-full truncate text-center text-[10px] leading-tight font-semibold">
-                  Lainnya
-                </span>
-              </button>
+              />
             )}
           </div>
           <div className="h-safe-bottom" />

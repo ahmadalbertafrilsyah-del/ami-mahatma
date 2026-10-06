@@ -209,6 +209,13 @@ html {
   /* Mencegah efek pantul seluruh halaman, salah satu penanda paling kentara
      bahwa sebuah layar adalah halaman web dan bukan aplikasi. */
   overscroll-behavior-y: none;
+
+  /* Tinggi bilah atas, termasuk area takik. Dipakai elemen lengket di dalam
+     konten agar menempel tepat di bawah bilah atas, bukan tertimbun olehnya. */
+  --header-h: calc(4rem + env(safe-area-inset-top, 0px));
+
+  /* Tinggi navigasi bawah, di luar area gestur. */
+  --bottomnav-h: 3.5rem;
 }
 
 body {
@@ -225,6 +232,65 @@ body {
    masing-masing komponen lewat kelas `active:`. */
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+/*
+  Kolom isian pada layar sempit dipaksa 16px.
+
+  Safari iOS memperbesar seluruh halaman begitu sebuah kolom isian bertulisan
+  di bawah 16px mendapat fokus, lalu tidak mengembalikannya. Inilah penyebab
+  tampilan "melompat" setiap kali mengetik, dan penanda paling kentara bahwa
+  sesuatu adalah halaman web, bukan aplikasi. Ukuran 14px tetap dipakai mulai
+  lebar 640px ke atas, tempat perilaku itu tidak berlaku.
+*/
+@media (max-width: 639px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/*
+  Teks pada kerangka aplikasi (bilah atas, sidebar, navigasi bawah, tombol)
+  tidak dapat disorot. Menekan lama sebuah tombol di aplikasi ponsel tidak
+  memunculkan penyeleksi teks, dan menyeret di atas navigasi tidak menyorot
+  labelnya.
+*/
+.app-chrome,
+.app-chrome * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Elemen lengket di dalam konten, tepat di bawah bilah atas. */
+.sticky-below-header {
+  position: sticky;
+  top: var(--header-h);
+}
+
+/*
+  Navigasi bawah menempati tinggi tetap `--bottomnav-h`. Dua utilitas berikut
+  mengacu ke angka yang sama, supaya konten dan bilah aksi lengket selalu
+  berhenti tepat di atasnya alih-alih tertimbun — keduanya otomatis kembali
+  normal mulai lebar 1024px, tempat navigasi bawah tidak ditampilkan.
+*/
+.pb-bottomnav {
+  padding-bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom, 0px) + 1rem);
+}
+
+.bottom-above-nav {
+  bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 1024px) {
+  .pb-bottomnav {
+    padding-bottom: 2rem;
+  }
+
+  .bottom-above-nav {
+    bottom: 0;
+  }
 }
 
 /* Judul dibuat sedikit rapat agar terbaca tegas pada ukuran besar. */

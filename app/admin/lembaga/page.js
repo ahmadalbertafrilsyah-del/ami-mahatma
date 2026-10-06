@@ -4,7 +4,6 @@ import { useState } from "react";
 import {
   addDoc,
   collection,
-  deleteDoc,
   doc,
   orderBy,
   query,
@@ -14,6 +13,9 @@ import {
 
 import { db } from "@/lib/firebase";
 import { useQuerySnapshot } from "@/lib/hooks";
+import { apiFetch } from "@/lib/api-client";
+import { authHeaders } from "@/components/auth-provider";
+import { ExcelImportModal } from "@/components/excel-import";
 import {
   INSTITUTION_STATUS,
   INSTITUTION_STATUS_LABEL,
@@ -65,6 +67,7 @@ export default function LembagaPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [banner, setBanner] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   const counts = {
     [INSTITUTION_STATUS.PENDING]: list.filter((m) => m.status === INSTITUTION_STATUS.PENDING).length,
@@ -126,18 +129,39 @@ export default function LembagaPage() {
     }
   }
 
+  /**
+   * Menghapus lembaga lewat route handler, bukan langsung dari klien, karena
+   * dokumen audit menyimpan temuan pada subkoleksi yang hanya dapat dihapus
+   * menyeluruh oleh Admin SDK.
+   */
   async function remove(institution) {
     const terpakai = audits.filter((a) => a.institutionId === institution.id).length;
-    if (terpakai > 0) {
+
+    const peringatan =
+      terpakai > 0
+        ? `Hapus "${institution.nama}"?\n\nLembaga ini punya ${terpakai} dokumen audit. Seluruh dokumen audit beserta temuan dan rencana tindak lanjutnya ikut terhapus permanen.\n\nBila Anda hanya ingin menghentikannya, tekan Batal lalu pakai tombol Tolak agar riwayatnya tetap utuh.`
+        : `Hapus data lembaga "${institution.nama}"?`;
+
+    if (!confirm(peringatan)) return;
+
+    setBusy(true);
+    try {
+      const url = `/api/admin/institutions?id=${encodeURIComponent(institution.id)}${
+        terpakai > 0 ? "&cascade=1" : ""
+      }`;
+      const body = await apiFetch(url, { method: "DELETE", headers: await authHeaders() });
+
       setBanner({
-        tone: "red",
-        text: `Lembaga ini sudah punya ${terpakai} dokumen audit. Tandai Ditolak saja agar riwayatnya tetap utuh.`,
+        tone: "amber",
+        text: body.deletedAudits
+          ? `${institution.nama} dihapus beserta ${body.deletedAudits} dokumen auditnya.`
+          : `${institution.nama} dihapus.`,
       });
-      return;
+    } catch (err) {
+      setBanner({ tone: "red", text: `Gagal menghapus: ${err.message}` });
+    } finally {
+      setBusy(false);
     }
-    if (!confirm(`Hapus data lembaga "${institution.nama}"?`)) return;
-    await deleteDoc(doc(db, "institutions", institution.id));
-    setBanner({ tone: "amber", text: `${institution.nama} dihapus.` });
   }
 
   return (
@@ -147,15 +171,20 @@ export default function LembagaPage() {
         title="Lembaga"
         description="Pendaftaran yang masuk dari formulir publik beserta seluruh satuan pendidikan yang diaudit."
         actions={
-          <Button
-            onClick={() => {
-              setForm(EMPTY);
-              setError("");
-              setModal({ mode: "create" });
-            }}
-          >
-            + Tambah Lembaga
-          </Button>
+          <>
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              Impor Excel
+            </Button>
+            <Button
+              onClick={() => {
+                setForm(EMPTY);
+                setError("");
+                setModal({ mode: "create" });
+              }}
+            >
+              + Tambah Lembaga
+            </Button>
+          </>
         }
       />
 
@@ -291,6 +320,29 @@ export default function LembagaPage() {
             : null}
         </Table>
       </Card>
+
+      <ExcelImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        title="Impor Lembaga dari Excel"
+        description="Tambahkan banyak satuan pendidikan sekaligus lewat satu berkas."
+        endpoint="/api/admin/institutions/import"
+        templateName="template-impor-lembaga-sim-ami.xlsx"
+        satuan="lembaga"
+        limitNote="Format .xlsx, maksimal 2 MB dan 300 baris. Berkas diperiksa lebih dulu — belum ada data yang disimpan pada tahap ini."
+        rowMeta={(r) =>
+          [r.kota, r.statusLembaga ? INSTITUTION_STATUS_LABEL[r.statusLembaga] : null]
+            .filter(Boolean)
+            .join(" · ")
+        }
+        successNote="Lengkapi data yang masih kosong lewat tombol Ubah pada tiap barisnya."
+        onFinished={(hasil) =>
+          setBanner({
+            tone: hasil.gagal > 0 ? "amber" : "emerald",
+            text: `Impor selesai: ${hasil.dibuat} lembaga ditambahkan, ${hasil.gagal} baris dilewati.`,
+          })
+        }
+      />
 
       <Modal
         open={Boolean(modal)}

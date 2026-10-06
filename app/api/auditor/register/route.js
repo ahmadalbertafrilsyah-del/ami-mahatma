@@ -5,6 +5,9 @@ import { fail, ok, readJson, route } from "@/lib/api-response";
 import { INSTITUTION_STATUS, ROLES } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
+// Pendaftaran memanggil Firebase Authentication lalu menulis ke Firestore;
+// batas waktu bawaan sebagian hosting terlalu ketat untuk instance dingin.
+export const maxDuration = 30;
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -108,28 +111,31 @@ export const POST = route(async (request) => {
 
   const { auth, db } = getAdmin();
 
-  // Pemeriksaan awal supaya pesannya jelas; `createUser` tetap menjadi
-  // penentu akhir bila ada dua pendaftaran bersamaan.
-  const existing = await auth.getUserByEmail(email).catch(() => null);
-  if (existing) {
-    return fail(
-      "Email ini sudah terdaftar. Silakan masuk, atau pakai tautan lupa kata sandi bila Anda lupa sandinya.",
-      409
-    );
-  }
-
+  // Email ganda cukup diputuskan oleh createUser sendiri. Pemeriksaan terpisah
+  // sebelumnya hanya menambah satu perjalanan jaringan tanpa memberi jawaban
+  // yang lebih pasti — dua pendaftaran bersamaan tetap harus diputus di sini.
   let userRecord;
   try {
     userRecord = await auth.createUser({ email, password, displayName: nama });
   } catch (err) {
     if (err?.code === "auth/email-already-exists") {
-      return fail("Email ini sudah terdaftar. Silakan masuk.", 409);
+      return fail(
+        "Email ini sudah terdaftar. Silakan masuk, atau pakai tautan lupa kata sandi bila Anda lupa sandinya.",
+        409
+      );
     }
     return fail(err?.message || "Gagal membuat akun di Firebase Authentication.");
   }
 
+  // Profil dan lembaga ditulis sekaligus dalam satu batch: satu perjalanan
+  // jaringan, dan keduanya tersimpan atau sama-sama tidak — tidak ada lagi
+  // keadaan setengah jadi berupa akun tanpa lembaganya.
+  const institutionRef = institutionPayload ? db.collection("institutions").doc() : null;
+
   try {
-    await db.collection("users").doc(userRecord.uid).set({
+    const batch = db.batch();
+
+    batch.set(db.collection("users").doc(userRecord.uid), {
       uid: userRecord.uid,
       email,
       nama,
@@ -143,15 +149,9 @@ export const POST = route(async (request) => {
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     });
-  } catch (err) {
-    await auth.deleteUser(userRecord.uid).catch(() => {});
-    return fail(`Pendaftaran gagal disimpan: ${err.message}`, 500);
-  }
 
-  let institutionId = null;
-  if (institutionPayload) {
-    try {
-      const ref = await db.collection("institutions").add({
+    if (institutionRef) {
+      batch.set(institutionRef, {
         ...institutionPayload,
         status: INSTITUTION_STATUS.PENDING,
         sumber: "auditor",
@@ -159,19 +159,15 @@ export const POST = route(async (request) => {
         didaftarkanOlehNama: nama,
         createdAt: FieldValue.serverTimestamp(),
       });
-      institutionId = ref.id;
-    } catch (err) {
-      // Akun tetap dipertahankan: auditor sudah terdaftar dan tinggal
-      // menunggu persetujuan. Lembaganya dapat ditambahkan belakangan.
-      console.error("[auditor/register] lembaga gagal disimpan:", err);
-      return ok({
-        uid: userRecord.uid,
-        institutionId: null,
-        warning:
-          "Akun Anda berhasil dibuat, tetapi data lembaga gagal disimpan. Sampaikan data lembaga kepada administrator setelah akun disetujui.",
-      });
     }
+
+    await batch.commit();
+  } catch (err) {
+    // Akun autentikasi sudah terlanjur dibuat; tanpa pembersihan ini emailnya
+    // terkunci oleh akun yang tidak pernah muncul di daftar mana pun.
+    await auth.deleteUser(userRecord.uid).catch(() => {});
+    return fail(`Pendaftaran gagal disimpan: ${err.message}`, 500);
   }
 
-  return ok({ uid: userRecord.uid, institutionId });
+  return ok({ uid: userRecord.uid, institutionId: institutionRef?.id ?? null });
 });

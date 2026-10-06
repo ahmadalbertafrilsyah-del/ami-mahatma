@@ -45,7 +45,7 @@ export function Card({ className, children, ...rest }) {
     <div
       className={cx(
         "print-flat rounded-2xl border border-slate-200/80 bg-surface shadow-sm shadow-black/[0.04]",
-        !className?.includes("p-") && "p-5",
+        !className?.includes("p-") && "p-4 sm:p-5",
         className
       )}
       {...rest}
@@ -86,9 +86,14 @@ const BUTTON_VARIANTS = {
   ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 disabled:text-slate-300",
 };
 
+/*
+  Tinggi minimum pada layar sempit mengikuti anjuran target sentuh (sekitar
+  44px untuk tombol utama). Di layar lebar, tempat penunjuknya tetikus,
+  tingginya dibiarkan mengikuti isi agar tata letak tidak longgar.
+*/
 const BUTTON_SIZES = {
-  sm: "px-2.5 py-1.5 text-xs gap-1.5",
-  md: "px-4 py-2.5 text-sm gap-2",
+  sm: "px-3 py-1.5 text-xs gap-1.5 max-sm:min-h-9 max-sm:px-3.5",
+  md: "px-4 py-2.5 text-sm gap-2 max-sm:min-h-11",
 };
 
 export function Button({ variant = "primary", size = "md", className, type = "button", ...rest }) {
@@ -96,7 +101,7 @@ export function Button({ variant = "primary", size = "md", className, type = "bu
     <button
       type={type}
       className={cx(
-        "inline-flex items-center justify-center rounded-xl font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed",
+        "app-chrome inline-flex items-center justify-center rounded-xl font-semibold whitespace-nowrap transition-[background-color,color,transform] select-none active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100",
         BUTTON_SIZES[size] ?? BUTTON_SIZES.md,
         BUTTON_VARIANTS[variant] ?? BUTTON_VARIANTS.primary,
         className
@@ -147,19 +152,32 @@ export function Textarea({ className, rows = 3, ...rest }) {
 
 export function PageHeader({ eyebrow, title, description, actions }) {
   return (
-    <header className="mb-6 flex flex-col gap-4 border-b border-slate-200/80 pb-5 lg:flex-row lg:items-end lg:justify-between">
+    <header className="mb-5 flex flex-col gap-4 border-b border-slate-200/80 pb-5 sm:mb-6 lg:flex-row lg:items-end lg:justify-between">
       <div className="min-w-0">
         {eyebrow && (
-          <p className="text-xs font-bold tracking-[0.14em] text-emerald-700 uppercase">{eyebrow}</p>
+          <p className="text-[11px] font-bold tracking-[0.14em] text-emerald-700 uppercase sm:text-xs">
+            {eyebrow}
+          </p>
         )}
-        <h1 className="mt-1.5 text-2xl font-bold text-balance text-slate-900 sm:text-3xl">{title}</h1>
+        <h1 className="mt-1 text-[1.6rem] leading-tight font-bold text-balance text-slate-900 sm:mt-1.5 sm:text-3xl">
+          {title}
+        </h1>
         {description && (
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-pretty text-slate-500">
             {description}
           </p>
         )}
       </div>
-      {actions && <div className="flex shrink-0 flex-wrap gap-2 lg:justify-end">{actions}</div>}
+      {/*
+        Di layar sempit tombol aksi dibagi rata selebar layar, seperti baris
+        tombol pada aplikasi ponsel, alih-alih membungkus tidak beraturan
+        begitu jumlahnya lebih dari satu.
+      */}
+      {actions && (
+        <div className="flex shrink-0 gap-2 max-sm:[&>*]:flex-1 sm:flex-wrap lg:justify-end">
+          {actions}
+        </div>
+      )}
     </header>
   );
 }
@@ -169,7 +187,7 @@ export function StickyToolbar({ children, className }) {
   return (
     <div
       className={cx(
-        "print-static sticky top-16 z-10 -mx-4 mb-5 border-b border-slate-200/80 bg-surface/85 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6",
+        "print-static sticky-below-header z-10 -mx-4 mb-5 border-b border-slate-200/80 bg-surface/85 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6",
         className
       )}
     >

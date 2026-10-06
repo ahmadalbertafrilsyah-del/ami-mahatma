@@ -83,7 +83,7 @@ export default function BerandaPage() {
   return (
     <div className="min-h-screen-dvh">
       <header className="pt-safe sticky top-0 z-20 border-b border-slate-200/80 bg-surface/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:px-6">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:h-16 sm:px-6">
           <BrandLogo size={36} />
           <span className="min-w-0 flex-1">
             <strong className="block truncate text-sm font-semibold text-slate-900">
@@ -106,20 +106,20 @@ export default function BerandaPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-        <div className="grid items-start gap-10 lg:grid-cols-[1fr_minmax(24rem,26rem)] lg:gap-14">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-14">
+        <div className="grid items-start gap-8 lg:grid-cols-[1fr_minmax(24rem,26rem)] lg:gap-14">
           <section>
             <p className="text-xs font-bold tracking-[0.14em] text-emerald-700 uppercase">
               {APP_TAGLINE}
             </p>
-            <h1 className="mt-3 text-4xl leading-[1.1] font-bold tracking-tight text-balance text-slate-900 sm:text-5xl">
+            <h1 className="mt-2.5 text-[2rem] leading-[1.12] font-bold tracking-tight text-balance text-slate-900 sm:text-5xl">
               Audit mutu internal untuk setiap satuan pendidikan
             </h1>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-pretty text-slate-600">
+            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-pretty text-slate-600 sm:text-base">
               {APP_DESCRIPTION}
             </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <div className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-2">
               {LANGKAH.map(([judul, isi]) => (
                 <Card key={judul} className="bg-surface/70">
                   <p className="font-semibold text-slate-900">{judul}</p>
@@ -255,7 +255,7 @@ export default function BerandaPage() {
         </div>
       </main>
 
-      <footer className="border-t border-slate-200/80 py-8">
+      <footer className="pb-safe border-t border-slate-200/80 pt-8">
         <p className="text-center text-xs text-slate-400">
           {APP_NAME} · {APP_TAGLINE}
         </p>

@@ -100,12 +100,12 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="flex items-center justify-center bg-surface px-5 py-10 sm:px-12">
+      <div className="pt-safe pb-safe flex items-center justify-center bg-surface px-5 py-10 sm:px-12">
         <div className="w-full max-w-sm">
           <p className="text-xs font-bold tracking-[0.14em] text-emerald-700 uppercase">
             Akses Petugas
           </p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+          <h2 className="mt-2 text-[1.75rem] leading-tight font-bold tracking-tight text-slate-900 sm:text-3xl">
             Masuk ke {APP_NAME}
           </h2>
           <p className="mt-1 text-sm text-slate-500">
